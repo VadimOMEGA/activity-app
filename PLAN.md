@@ -9,7 +9,7 @@ condiționale) se implementează în migrații SQL manuale.
 
 1. Faza 0: Setup proiect backend și standarde de lucru
 2. Faza 1: Modelare Prisma inițială pentru Identity + Membership + Meetups + Dojo + General Assembly
-3. Faza 2: Migrarea 0001 și trigger-ele obligatorii
+3. Faza 2: Generarea tipurilor TypeScript
 4. Faza 3: Implementare NestJS Auth + RBAC
 5. Faza 4: Implementare module core (Profiles, Members, Meetups, Dojo, General Assembly)
 6. Faza 5: Modelare Prisma pentru Festival + Blog
@@ -53,7 +53,8 @@ condiționale) se implementează în migrații SQL manuale.
 
 3. Workflow standard pentru fiecare modul (adaptat pe stilul tău Mongo):
    - definești modelele în Prisma
-   - rulezi migrarea
+   - rulezi migrarea dupa fiecare model nou sau modificat
+    - npx prisma migrate dev --name nume_migrare
    - generezi modul, service, controller NestJS
    - creezi DTO-uri cu validări explicite
    - implementezi service
@@ -148,26 +149,11 @@ General Assembly:
 - general_assembly_attendees: PK compus (assembly_id, member_id); FK assembly_id ->
   general_assemblies.id; FK member_id -> members.id; attended
 
-## Faza 2: Migrarea 0001 și trigger-ele obligatorii
+## Faza 2: Generarea tipurilor TypeScript
 
-1. Rulezi migrarea inițială după definirea modelelor:
-
-- npx prisma migrate dev --name 0001_initial_schema
-
-2. Adaugi SQL manual în migrarea generată pentru constrângeri pe care Prisma nu le exprimă complet:
-
-- exclusivitate CTI: member prezent exact într-una din aspiring_members sau full_members
-- membership_fees permis doar pentru full_members.kind = regular
-- meetup exclusiv: workshop xor anti_workshop
-
-3. Regenerare client:
-
+Generezi tipurile TypeScript pentru Prisma Client:
 - npx prisma generate
 
-4. Verificare locală SQLite:
-
-- npx prisma studio
-- verifici că insert-urile invalide sunt blocate de trigger
 
 ## Faza 3: Auth + RBAC (prima implementare în NestJS)
 
