@@ -1,0 +1,30 @@
+model GeneralAssembly {
+    id                       String                    @id @default(uuid())
+
+    year                     Int
+    announcedAt              DateTime                  @map("announced_at")
+    heldAt                   DateTime                  @map("held_at")
+    location                 String
+    minQuorum                Int                       @map("min_quorum")
+
+    createdAt                DateTime                  @default(now()) @map("created_at")
+    updatedAt                DateTime                  @updatedAt @map("updated_at")
+
+    generalAssemblyAttendees GeneralAssemblyAttendee[]
+
+    @@map("general_assemblies")
+}
+
+model GeneralAssemblyAttendee {
+    assemblyId String          @map("assembly_id")
+    assembly   GeneralAssembly @relation(fields: [assemblyId], references: [id])
+
+    memberId   String          @unique @map("member_id")
+    member     Member          @relation(fields: [memberId], references: [id])
+
+    createdAt  DateTime        @default(now()) @map("created_at")
+    updatedAt  DateTime        @updatedAt @map("updated_at")
+
+    @@id([assemblyId, memberId])
+    @@map("general_assembly_attendees")
+}

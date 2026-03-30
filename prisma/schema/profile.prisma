@@ -1,0 +1,20 @@
+model Profile {
+  id String @id @default(cuid())
+
+  name      String
+  email     String   @unique
+  phone     String
+  birthDate DateTime @map("birth_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user      User?
+  member    Member?
+  meetupWorkshop MeetupWorkshop[]
+  dojoMentor DojoMentor?
+  dojoTutor DojoTutor?
+  dojoNinja DojoNinja?
+
+  @@map("profiles")
+}

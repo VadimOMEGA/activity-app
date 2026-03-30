@@ -96,22 +96,46 @@ Members (CTI):
 - members: PK id; FK profile_id -> profiles.id (UNIQUE), joined_at, created_at, updated_at
 - aspiring_members: PK/FK member_id -> members.id
 - full_members: PK/FK member_id -> members.id; full_member_kind CHECK founder|honorary|regular
+```
+<!-- Using an enum -->
+enum FullMemberKind {
+    FOUNDER
+    HONORARY
+    REGULAR
+}
+```
 - membership_fees: PK id; FK member_id -> members.id; year, amount, status; UNIQUE(member_id, year)
+```
+<!-- enum for status -->
+enum MembershipFeeStatus {
+    PAID
+    UNPAID
+}
+```
 
 Meetups:
 
 - meetups: PK id; starts_at, location, created_at, updated_at
 - meetup_workshops: PK id; FK meetup_id -> meetups.id (UNIQUE), FK presenter_id -> profiles.id,
-  title, theme CHECK
+  title, theme CHECK demo_your_stack|fup_nights|meet_the_business
+```
+<!-- enum for theme -->
+enum WorkshopTheme {
+    DEMO_YOUR_STACK
+    FUP_NIGHTS
+    MEET_THE_BUSINESS
+}
+```
 - meetup_anti_workshops: PK id; FK meetup_id -> meetups.id (UNIQUE), agenda
 
 Dojo:
 
 - dojo_mentors: PK id; FK profile_id -> profiles.id, description
 - dojo_tutors: PK id; FK profile_id -> profiles.id
-- dojo_ninjas: PK id; FK profile_id -> profiles.id; FK tutor_id -> dojo_tutors.id; useful_info
+- dojo_ninjas: PK id; FK profile_id -> profiles.id; FK tutor_id -> dojo_tutors.id (UNIQUE); useful_info
+  - a tutor can't exist without a ninja, but a ninja can exist without a tutor (e.g. if they are just starting)
 - dojo_sessions: PK id; starts_at, location, theme, FK mentor_id -> dojo_mentors.id
-- agreement_documents: PK id; name UNIQUE
+- agreement_documents: PK id; name - for display, slug UNIQUE - for URL
 - mentor_agreement_signatures: PK id; FK mentor_id -> dojo_mentors.id; FK document_id ->
   agreement_documents.id; signed_at; UNIQUE(mentor_id, document_id)
 - tutor_agreement_signatures: PK id; FK tutor_id -> dojo_tutors.id; FK document_id ->
@@ -120,7 +144,7 @@ Dojo:
 General Assembly:
 
 - general_assemblies: PK id; year, announced_at, held_at, location, min_quorum,
-  activity_report_document_id, minutes_document_id
+  - activity_report_document_id, minutes_document_id (later phase)
 - general_assembly_attendees: PK compus (assembly_id, member_id); FK assembly_id ->
   general_assemblies.id; FK member_id -> members.id; attended
 

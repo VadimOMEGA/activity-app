@@ -1,0 +1,47 @@
+// enums
+enum WorkshopTheme {
+    DEMO_YOUR_STACK
+    FUP_NIGHTS
+    MEET_THE_BUSINESS
+}
+
+model Meetup {
+    id                 String              @id @default(cuid())
+
+    startsAt           DateTime            @map("starts_at")
+    location           String
+
+    createdAt          DateTime            @default(now()) @map("created_at")
+    updatedAt          DateTime            @updatedAt @map("updated_at")
+
+    meetupWorkshop     MeetupWorkshop?
+    meetupAntiWorkshop MeetupAntiWorkshop?
+
+    @@map("meetups")
+}
+
+model MeetupWorkshop {
+    id          String        @id @default(cuid())
+
+    title       String
+    theme       WorkshopTheme
+
+    meetupId    String        @unique @map("meetup_id")
+    meetup      Meetup        @relation(fields: [meetupId], references: [id])
+
+    presenterId String        @map("presenter_id")
+    presenter   Profile       @relation(fields: [presenterId], references: [id])
+
+    @@map("meetup_workshops")
+}
+
+model MeetupAntiWorkshop {
+    id       String @id @default(cuid())
+
+    meetupId String @unique @map("meetup_id")
+    meetup   Meetup @relation(fields: [meetupId], references: [id])
+    
+    agenda   String
+
+    @@map("meetup_anti_workshops")
+}

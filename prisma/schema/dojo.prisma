@@ -1,0 +1,115 @@
+model DojoMentor {
+    id                        String                     @id @default(cuid())
+
+    profileId                 String                     @unique @map("profile_id")
+    profile                   Profile                    @relation(fields: [profileId], references: [id])
+
+    description               String
+
+    createdAt                 DateTime                   @default(now()) @map("created_at")
+    updatedAt                 DateTime                   @updatedAt @map("updated_at")
+
+    dojoSessions              DojoSession[]
+    mentorAgreementSignatures MentorAgreementSignature[]
+
+    @@map("dojo_mentors")
+}
+
+model DojoTutor {
+    id                       String                    @id @default(cuid())
+
+    profileId                String                    @unique @map("profile_id")
+    profile                  Profile                   @relation(fields: [profileId], references: [id])
+
+    createdAt                DateTime                  @default(now()) @map("created_at")
+    updatedAt                DateTime                  @updatedAt @map("updated_at")
+
+    dojoNinja                DojoNinja?
+    tutorAgreementSignatures TutorAgreementSignature[]
+
+    @@map("dojo_tutors")
+}
+
+model DojoNinja {
+    id         String    @id @default(cuid())
+
+    profileId  String    @unique @map("profile_id")
+    profile    Profile   @relation(fields: [profileId], references: [id])
+
+    tutorId    String    @unique @map("tutor_id")
+    tutor      DojoTutor @relation(fields: [tutorId], references: [id])
+
+    usefulInfo String    @map("useful_info")
+
+    createdAt  DateTime  @default(now()) @map("created_at")
+    updatedAt  DateTime  @updatedAt @map("updated_at")
+
+    @@map("dojo_ninjas")
+}
+
+model DojoSession {
+    id        String     @id @default(cuid())
+
+    startsAt  DateTime   @map("starts_at")
+    location  String
+    theme     String
+
+    mentorId  String     @map("mentor_id")
+    mentor    DojoMentor @relation(fields: [mentorId], references: [id])
+
+    createdAt DateTime   @default(now()) @map("created_at")
+    updatedAt DateTime   @updatedAt @map("updated_at")
+
+    @@map("dojo_sessions")
+}
+
+model AgreementDocument {
+    id                        String                     @id @default(cuid())
+
+    name                      String
+    slug                      String                     @unique
+
+    createdAt                 DateTime                   @default(now()) @map("created_at")
+    updatedAt                 DateTime                   @updatedAt @map("updated_at")
+
+    mentorAgreementSignatures MentorAgreementSignature[]
+    tutorAgreementSignatures  TutorAgreementSignature[]
+
+    @@map("agreement_documents")
+}
+
+model MentorAgreementSignature {
+    id          String            @id @default(cuid())
+
+    mentorId    String            @map("mentor_id")
+    mentor      DojoMentor        @relation(fields: [mentorId], references: [id])
+
+    docuementId String            @map("document_id")
+    document    AgreementDocument @relation(fields: [docuementId], references: [id])
+
+    signedAt    DateTime          @map("signed_at")
+
+    createdAt   DateTime          @default(now()) @map("created_at")
+    updatedAt   DateTime          @updatedAt @map("updated_at")
+
+    @@unique([mentorId, docuementId])
+    @@map("mentor_agreement_signatures")
+}
+
+model TutorAgreementSignature {
+    id          String            @id @default(cuid())
+
+    tutorId     String            @map("tutor_id")
+    tutor       DojoTutor         @relation(fields: [tutorId], references: [id])
+
+    docuementId String            @map("document_id")
+    document    AgreementDocument @relation(fields: [docuementId], references: [id])
+
+    signedAt    DateTime          @map("signed_at")
+    
+    createdAt   DateTime          @default(now()) @map("created_at")
+    updatedAt   DateTime          @updatedAt @map("updated_at")
+
+    @@unique([tutorId, docuementId])
+    @@map("tutor_agreement_signatures")
+}
