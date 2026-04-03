@@ -1,13 +1,13 @@
 model DojoMentor {
-    id                        String                     @id @default(cuid())
+    id String @id @default(cuid())
 
-    profileId                 String                     @unique @map("profile_id")
-    profile                   Profile                    @relation(fields: [profileId], references: [id])
+    profileId String  @unique @map("profile_id")
+    profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    description               String
+    description String
 
-    createdAt                 DateTime                   @default(now()) @map("created_at")
-    updatedAt                 DateTime                   @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     dojoSessions              DojoSession[]
     mentorAgreementSignatures MentorAgreementSignature[]
@@ -16,13 +16,13 @@ model DojoMentor {
 }
 
 model DojoTutor {
-    id                       String                    @id @default(cuid())
+    id String @id @default(cuid())
 
-    profileId                String                    @unique @map("profile_id")
-    profile                  Profile                   @relation(fields: [profileId], references: [id])
+    profileId String  @unique @map("profile_id")
+    profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    createdAt                DateTime                  @default(now()) @map("created_at")
-    updatedAt                DateTime                  @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     dojoNinja                DojoNinja?
     tutorAgreementSignatures TutorAgreementSignature[]
@@ -31,46 +31,46 @@ model DojoTutor {
 }
 
 model DojoNinja {
-    id         String    @id @default(cuid())
+    id String @id @default(cuid())
 
-    profileId  String    @unique @map("profile_id")
-    profile    Profile   @relation(fields: [profileId], references: [id])
+    profileId String  @unique @map("profile_id")
+    profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    tutorId    String    @unique @map("tutor_id")
-    tutor      DojoTutor @relation(fields: [tutorId], references: [id])
+    tutorId String?   @unique @map("tutor_id")
+    tutor   DojoTutor? @relation(fields: [tutorId], references: [id], onDelete: SetNull)
 
-    usefulInfo String    @map("useful_info")
+    usefulInfo String @map("useful_info")
 
-    createdAt  DateTime  @default(now()) @map("created_at")
-    updatedAt  DateTime  @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@map("dojo_ninjas")
 }
 
 model DojoSession {
-    id        String     @id @default(cuid())
+    id String @id @default(cuid())
 
-    startsAt  DateTime   @map("starts_at")
-    location  String
-    theme     String
+    startsAt DateTime @map("starts_at")
+    location String
+    theme    String
 
-    mentorId  String     @map("mentor_id")
-    mentor    DojoMentor @relation(fields: [mentorId], references: [id])
+    mentorId String?     @map("mentor_id")
+    mentor   DojoMentor? @relation(fields: [mentorId], references: [id], onDelete: SetNull)
 
-    createdAt DateTime   @default(now()) @map("created_at")
-    updatedAt DateTime   @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@map("dojo_sessions")
 }
 
 model AgreementDocument {
-    id                        String                     @id @default(cuid())
+    id String @id @default(cuid())
 
-    name                      String
-    slug                      String                     @unique
+    name String
+    slug String @unique
 
-    createdAt                 DateTime                   @default(now()) @map("created_at")
-    updatedAt                 DateTime                   @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     mentorAgreementSignatures MentorAgreementSignature[]
     tutorAgreementSignatures  TutorAgreementSignature[]
@@ -79,36 +79,36 @@ model AgreementDocument {
 }
 
 model MentorAgreementSignature {
-    id          String            @id @default(cuid())
+    id String @id @default(cuid())
 
-    mentorId    String            @map("mentor_id")
-    mentor      DojoMentor        @relation(fields: [mentorId], references: [id])
+    mentorId String     @map("mentor_id")
+    mentor   DojoMentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
 
     docuementId String            @map("document_id")
-    document    AgreementDocument @relation(fields: [docuementId], references: [id])
+    document    AgreementDocument @relation(fields: [docuementId], references: [id], onDelete: Cascade)
 
-    signedAt    DateTime          @map("signed_at")
+    signedAt DateTime @map("signed_at")
 
-    createdAt   DateTime          @default(now()) @map("created_at")
-    updatedAt   DateTime          @updatedAt @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@unique([mentorId, docuementId])
     @@map("mentor_agreement_signatures")
 }
 
 model TutorAgreementSignature {
-    id          String            @id @default(cuid())
+    id String @id @default(cuid())
 
-    tutorId     String            @map("tutor_id")
-    tutor       DojoTutor         @relation(fields: [tutorId], references: [id])
+    tutorId String    @map("tutor_id")
+    tutor   DojoTutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
     docuementId String            @map("document_id")
-    document    AgreementDocument @relation(fields: [docuementId], references: [id])
+    document    AgreementDocument @relation(fields: [docuementId], references: [id], onDelete: Cascade)
 
-    signedAt    DateTime          @map("signed_at")
-    
-    createdAt   DateTime          @default(now()) @map("created_at")
-    updatedAt   DateTime          @updatedAt @map("updated_at")
+    signedAt DateTime @map("signed_at")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@unique([tutorId, docuementId])
     @@map("tutor_agreement_signatures")

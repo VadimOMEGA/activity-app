@@ -15,7 +15,7 @@ model Member {
     id             String          @id @default(cuid())
 
     profileId      String          @unique @map("profile_id")
-    profile        Profile         @relation(fields: [profileId], references: [id])
+    profile        Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
     joinedAt       DateTime        @default(now()) @map("joined_at")
     createdAt      DateTime        @default(now()) @map("created_at")
@@ -31,14 +31,14 @@ model Member {
 
 model AspiringMember {
     memberId String @id @map("member_id")
-    member   Member @relation(fields: [memberId], references: [id])
+    member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
     @@map("aspiring_members")
 }
 
 model FullMember {
     memberId       String         @id @map("member_id")
-    member         Member         @relation(fields: [memberId], references: [id])
+    member         Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
     fullMemberKind FullMemberKind @map("full_member_kind")
 
@@ -49,7 +49,7 @@ model MembershipFee {
     id        String              @id @default(cuid())
 
     memberId  String              @map("member_id")
-    member    Member              @relation(fields: [memberId], references: [id])
+    member    Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
     year      Int
     amount    Float

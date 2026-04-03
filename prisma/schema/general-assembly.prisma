@@ -17,10 +17,10 @@ model GeneralAssembly {
 
 model GeneralAssemblyAttendee {
     assemblyId String          @map("assembly_id")
-    assembly   GeneralAssembly @relation(fields: [assemblyId], references: [id])
+    assembly   GeneralAssembly @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
 
     memberId   String          @unique @map("member_id")
-    member     Member          @relation(fields: [memberId], references: [id])
+    member     Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
     createdAt  DateTime        @default(now()) @map("created_at")
     updatedAt  DateTime        @updatedAt @map("updated_at")

@@ -2,8 +2,7 @@
 
 Planul recomandat este să construiești API-ul ca modular monolith NestJS, pornind cu autentificare
 și RBAC, apoi modulele de business în ordinea dependențelor. Prisma va acoperi majoritatea
-modelării, iar regulile care nu pot fi exprimate direct (CTI exclusiv, limite redeem, reguli
-condiționale) se implementează în migrații SQL manuale.
+modelării, iar regulile care nu pot fi exprimate direct se implementează în aplicație.
 
 **Steps**
 
@@ -37,24 +36,25 @@ condiționale) se implementează în migrații SQL manuale.
 ```
 
 1. Inițializezi proiectul NestJS și dependințele principale:
-   - nest new ai3-backend
-   - npm i @prisma/client prisma
-   - npm install @prisma/adapter-better-sqlite3
-   - npm i @nestjs/config class-validator class-transformer
-   - npm i @nestjs/jwt @nestjs/passport passport passport-jwt argon2
+   - `nest new ai3-backend`
+   - `npm i @prisma/client prisma`
+   - `npm install @prisma/adapter-better-sqlite3`
+   - `npm i @nestjs/config class-validator class-transformer`
+   - `npm i @nestjs/jwt @nestjs/passport passport passport-jwt argon2 cookie-parser`
+   - `npm i --save-dev @types/passport-jwt`
+   - `npm i date-fns`
 
 2. Configurezi Prisma cu SQLite: 
-    - npx prisma init 
-    - în .env setezi DATABASE_URL="file:./name.db" 
+    - `npx prisma init`
+    - în .env setezi `DATABASE_URL="file:./name.db"`
     - în prisma/schema.prisma setezi provider sqlite
    <a href="https://docs.nestjs.com/recipes/prisma"><small>Documentatie Prisma/NestJS</small></a>
    <a href="https://docs.nestjs.com/techniques/configuration"><small>Config Module pentru
    .env</small></a> <br>
 
-3. Workflow standard pentru fiecare modul (adaptat pe stilul tău Mongo):
+3. Workflow standard pentru fiecare modul:
    - definești modelele în Prisma
-   - rulezi migrarea dupa fiecare model nou sau modificat
-    - npx prisma migrate dev --name nume_migrare
+   - rulezi migrarea dupa fiecare model nou sau modificat cu `npx prisma migrate dev --name nume_migrare`
    - generezi modul, service, controller NestJS
    - creezi DTO-uri cu validări explicite
    - implementezi service
@@ -159,28 +159,21 @@ Generezi tipurile TypeScript pentru Prisma Client:
 
 1. Creezi modulele:
 
-- auth, users, roles
+- auth, users, roles, profiles
 
 2. Implementare auth recomandată:
 
 - JWT access + refresh tokens
-- parole hash cu bcrypt
-- JwtAuthGuard + RolesGuard
-- decorator Roles pentru endpoint-uri
+- parole hash cu argon2
+- JwtAuthGuard + RolesGuard combinate cu decorator @Auth('NumeRol1', 'NumeRol2') pentru protecția endpoint-urilor
 
 3. Endpoint-uri minime:
 
 - POST /auth/register
 - POST /auth/login
-- POST /auth/refresh
-- GET /auth/me
+- POST /auth/login/refresh
 
-4. DTO-uri și validări (model de lucru):
-
-- RegisterDto: username IsString + MinLength(3) + MaxLength(50); password IsString + MinLength(8) +
-  MaxLength(128); profileId IsInt + Min(1)
-- LoginDto: username IsString + MinLength(3); password IsString + MinLength(8)
-- AssignRoleDto: userId IsInt + Min(1); role IsString + Matches pe naming role
+4. DTO-uri pentru fiecare colectie cu validări explicite (IsString, IsInt, IsEmail, IsIn, etc).
 
 5. Activezi ValidationPipe global cu whitelist, forbidNonWhitelisted și transform.
 

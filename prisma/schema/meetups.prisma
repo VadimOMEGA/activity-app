@@ -27,10 +27,10 @@ model MeetupWorkshop {
     theme       WorkshopTheme
 
     meetupId    String        @unique @map("meetup_id")
-    meetup      Meetup        @relation(fields: [meetupId], references: [id])
+    meetup      Meetup        @relation(fields: [meetupId], references: [id], onDelete: Cascade)
 
-    presenterId String        @map("presenter_id")
-    presenter   Profile       @relation(fields: [presenterId], references: [id])
+    presenterId String?        @map("presenter_id")
+    presenter   Profile?       @relation(fields: [presenterId], references: [id], onDelete: SetNull)
 
     @@map("meetup_workshops")
 }
@@ -39,7 +39,7 @@ model MeetupAntiWorkshop {
     id       String @id @default(cuid())
 
     meetupId String @unique @map("meetup_id")
-    meetup   Meetup @relation(fields: [meetupId], references: [id])
+    meetup   Meetup @relation(fields: [meetupId], references: [id], onDelete: Cascade)
     
     agenda   String
 
