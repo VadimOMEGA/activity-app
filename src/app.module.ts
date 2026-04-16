@@ -8,9 +8,9 @@ import { MembersModule } from './members/members.module'
 import { MembershipFeesModule } from './membership-fees/membership-fees.module'
 import { GeneralAssembliesModule } from './general-assemblies/general-assemblies.module'
 import { MeetupsModule } from './meetups/meetups.module'
-import { DojoMentorsModule } from './dojo-mentors/dojo-mentor.module'
-import { DojoTutorsModule } from './dojo-tutor/dojo-tutor.module'
-import { DojoNinjasModule } from './dojo-ninjas/dojo-ninja.module'
+import { DojoMentorsModule } from './dojo-mentors/dojo-mentors.module'
+import { DojoTutorsModule } from './dojo-tutors/dojo-tutors.module'
+import { DojoNinjasModule } from './dojo-ninjas/dojo-ninjas.module'
 import { DojoSessionsModule } from './dojo-sessions/dojo-sessions.module'
 
 @Module({

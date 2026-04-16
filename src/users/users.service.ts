@@ -8,7 +8,7 @@ import { hash, verify } from 'argon2'
 
 import { ChangeUsernameDto, ResetPasswordDto } from 'src/auth/dto/auth.dto'
 import { RegisterDto } from 'src/auth/dto/register.dto'
-import { DojoMentorsService } from 'src/dojo-mentors/dojo-mentor.service'
+import { DojoMentorsService } from 'src/dojo-mentors/dojo-mentors.service'
 import { Prisma } from 'src/generated/prisma/client'
 import { RoleName } from 'src/generated/prisma/enums'
 import { MembersService } from 'src/members/members.service'

@@ -4,7 +4,7 @@ import { UsersController } from './users.controller'
 import { PrismaService } from 'src/prisma.service'
 import { ProfilesModule } from 'src/profiles/profiles.module'
 import { MembersModule } from 'src/members/members.module'
-import { DojoMentorsModule } from 'src/dojo-mentors/dojo-mentor.module'
+import { DojoMentorsModule } from 'src/dojo-mentors/dojo-mentors.module'
 
 @Module({
 	imports: [ProfilesModule, MembersModule, DojoMentorsModule],

@@ -10,7 +10,7 @@ import {
 	ValidationPipe
 } from '@nestjs/common'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { DojoTutorsService } from './dojo-tutor.service'
+import { DojoTutorsService } from './dojo-tutors.service'
 import { DojoTutorDto } from './dto/dojo-tutor.dto'
 
 @Controller('dojo-tutors')

@@ -11,7 +11,7 @@ import {
 	ValidationPipe
 } from '@nestjs/common'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { DojoNinjasService } from './dojo-ninja.service'
+import { DojoNinjasService } from './dojo-ninjas.service'
 import { DojoNinjaDto } from './dto/dojo-ninja.dto'
 import { UpdateDojoNinjaDto } from './dto/update-dojo-ninja.dto'
 

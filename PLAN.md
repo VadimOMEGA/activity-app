@@ -72,6 +72,7 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - src/dojo-mentors
    - src/dojo-tutors
    - src/dojo-ninjas
+   - src/dojo-sessions
    - src/general-assemblies
    - src/festival
    - src/blog

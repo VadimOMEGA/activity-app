@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { DojoMentorsService } from './dojo-mentor.service'
-import { DojoMentorsController } from './dojo-mentor.controller'
+import { DojoMentorsService } from './dojo-mentors.service'
+import { DojoMentorsController } from './dojo-mentors.controller'
 import { PrismaService } from 'src/prisma.service'
 
 @Module({
