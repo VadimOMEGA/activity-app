@@ -43,6 +43,10 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - `npm i @nestjs/jwt @nestjs/passport passport passport-jwt argon2 cookie-parser`
    - `npm i --save-dev @types/passport-jwt`
    - `npm i date-fns`
+   - `npm i @aws-sdk/client-s3 @aws-sdk/s3-request-presigner`
+   - `npm i mime-types`
+
+   Se instalează `aws-sdk` dar se va folosi `Filebase` pentru conviniență în loc de `AWS`. (Sunt compatibile)
 
 2. Configurezi Prisma cu SQLite:
    - `npx prisma init`
@@ -63,11 +67,16 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - protejezi endpoint-urile cu guard-uri
 
 4. Structură recomandată src:
-   - src/common (filters for Prisma error catching)
+   - src/common (Filtru pentru erori specifice Prisma)
+   - src/generated (Tipuri TypeScript generate de Prisma)
+   - src/config (configurarea jwt)
+   - src/s3 (service S3 pentru upload/download fișiere)
    - src/auth
+   - src/users
    - src/roles
    - src/profiles
    - src/members
+   - src/membership-fees
    - src/meetups
    - src/dojo-mentors
    - src/dojo-tutors
@@ -76,7 +85,9 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - src/general-assemblies
    - src/festival
    - src/blog
-   - src/prisma
+   - prisma.service.ts
+   - app.module.ts
+   - main.ts
 
 ## Faza 1: Modelare Prisma pentru Core
 

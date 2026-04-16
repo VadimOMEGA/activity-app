@@ -12,6 +12,7 @@ import { DojoMentorsModule } from './dojo-mentors/dojo-mentors.module'
 import { DojoTutorsModule } from './dojo-tutors/dojo-tutors.module'
 import { DojoNinjasModule } from './dojo-ninjas/dojo-ninjas.module'
 import { DojoSessionsModule } from './dojo-sessions/dojo-sessions.module'
+import { S3Module } from './s3/s3.module';
 
 @Module({
 	imports: [
@@ -27,7 +28,8 @@ import { DojoSessionsModule } from './dojo-sessions/dojo-sessions.module'
 		DojoMentorsModule,
 		DojoTutorsModule,
 		DojoNinjasModule,
-		DojoSessionsModule
+		DojoSessionsModule,
+		S3Module
 	]
 })
 export class AppModule {}
