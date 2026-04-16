@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
-import { DojoTutorService } from './dojo-tutor.service'
-import { DojoTutorController } from './dojo-tutor.controller'
+import { DojoTutorsService } from './dojo-tutor.service'
+import { DojoTutorsController } from './dojo-tutor.controller'
 import { PrismaService } from 'src/prisma.service'
 
 @Module({
-	controllers: [DojoTutorController],
-	providers: [DojoTutorService, PrismaService]
+	controllers: [DojoTutorsController],
+	providers: [DojoTutorsService, PrismaService]
 })
-export class DojoTutorModule {}
+export class DojoTutorsModule {}

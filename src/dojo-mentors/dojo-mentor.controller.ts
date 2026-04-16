@@ -9,25 +9,25 @@ import {
 	ValidationPipe
 } from '@nestjs/common'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { DojoMentorService } from './dojo-mentor.service'
+import { DojoMentorsService } from './dojo-mentor.service'
 import { UpdateDojoMentorDto } from './dto/update-dojo-mentor.dto'
 
-@Controller('dojo-mentor')
-export class DojoMentorController {
-	constructor(private readonly dojoMentorService: DojoMentorService) {}
+@Controller('dojo-mentors')
+export class DojoMentorsController {
+	constructor(private readonly dojoMentorsService: DojoMentorsService) {}
 
 	@HttpCode(200)
 	@Get()
 	@Auth('ADMIN')
 	getAll() {
-		return this.dojoMentorService.getAll()
+		return this.dojoMentorsService.getAll()
 	}
 
 	@HttpCode(200)
 	@Get(':id')
 	@Auth('ADMIN')
 	getById(@Param('id') id: string) {
-		return this.dojoMentorService.getById(id)
+		return this.dojoMentorsService.getById(id)
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
@@ -35,6 +35,6 @@ export class DojoMentorController {
 	@Put(':id')
 	@Auth('ADMIN')
 	update(@Param('id') id: string, @Body() dto: UpdateDojoMentorDto) {
-		return this.dojoMentorService.update(id, dto)
+		return this.dojoMentorsService.update(id, dto)
 	}
 }

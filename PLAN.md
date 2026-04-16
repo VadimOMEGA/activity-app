@@ -63,13 +63,15 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - protejezi endpoint-urile cu guard-uri
 
 4. Structură recomandată src:
-   - src/common (pipes, guards, decorators, filters)
+   - src/common (filters for Prisma error catching)
    - src/auth
-   - src/rbac
+   - src/roles
    - src/profiles
    - src/members
    - src/meetups
-   - src/dojo
+   - src/dojo-mentors
+   - src/dojo-tutors
+   - src/dojo-ninjas
    - src/general-assemblies
    - src/festival
    - src/blog
@@ -246,7 +248,10 @@ DTO validări recomandate pe entități core:
   - location `IsString` `MinLength(2)` `MaxLength(255)`; 
   - theme `IsString` `MaxLength(255)`; 
   - mentorId `IsString`
-- AgreementSignature DTO: mentorId/tutorId IsInt; documentId IsInt; signedAt IsDateString
+- AgreementSignature DTO: 
+  - mentorId/tutorId `IsString`; 
+  - documentId `IsString`; 
+  - signedAt `IsDateString`
 - GeneralAssembly DTO: year IsInt Min(2020) Max(2100); announcedAt IsOptional IsDateString; heldAt
   IsOptional IsDateString; location IsOptional IsString MaxLength(255); minQuorum IsOptional IsInt
   Min(1)

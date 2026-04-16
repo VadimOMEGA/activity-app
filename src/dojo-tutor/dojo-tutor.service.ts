@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma.service'
 import { DojoTutorDto } from './dto/dojo-tutor.dto'
 
 @Injectable()
-export class DojoTutorService {
+export class DojoTutorsService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	getAll() {

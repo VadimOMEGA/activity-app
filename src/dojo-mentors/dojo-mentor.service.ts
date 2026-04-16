@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma.service'
 import { UpdateDojoMentorDto } from './dto/update-dojo-mentor.dto'
 
 @Injectable()
-export class DojoMentorService {
+export class DojoMentorsService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	getAll() {

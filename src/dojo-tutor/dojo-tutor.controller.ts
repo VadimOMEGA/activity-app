@@ -10,25 +10,25 @@ import {
 	ValidationPipe
 } from '@nestjs/common'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { DojoTutorService } from './dojo-tutor.service'
+import { DojoTutorsService } from './dojo-tutor.service'
 import { DojoTutorDto } from './dto/dojo-tutor.dto'
 
-@Controller('dojo-tutor')
-export class DojoTutorController {
-	constructor(private readonly dojoTutorService: DojoTutorService) {}
+@Controller('dojo-tutors')
+export class DojoTutorsController {
+	constructor(private readonly dojoTutorsService: DojoTutorsService) {}
 
 	@HttpCode(200)
 	@Get()
 	@Auth('ADMIN')
 	getAll() {
-		return this.dojoTutorService.getAll()
+		return this.dojoTutorsService.getAll()
 	}
 
 	@HttpCode(200)
 	@Get(':id')
 	@Auth('ADMIN')
 	getById(@Param('id') id: string) {
-		return this.dojoTutorService.getById(id)
+		return this.dojoTutorsService.getById(id)
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
@@ -36,13 +36,13 @@ export class DojoTutorController {
 	@Post()
 	@Auth('ADMIN')
 	create(@Body() dto: DojoTutorDto) {
-		return this.dojoTutorService.create(dto)
+		return this.dojoTutorsService.create(dto)
 	}
 
 	@HttpCode(200)
 	@Delete(':id')
 	@Auth('ADMIN')
 	delete(@Param('id') id: string) {
-		return this.dojoTutorService.delete(id)
+		return this.dojoTutorsService.delete(id)
 	}
 }
