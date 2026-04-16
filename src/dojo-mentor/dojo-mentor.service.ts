@@ -43,18 +43,6 @@ export class DojoMentorService {
 		})
 	}
 
-	async delete(id: string) {
-		const mentor = await this.prisma.dojoMentor.findUnique({
-			where: { id }
-		})
-
-		if (!mentor) throw new NotFoundException('Dojo mentor not found')
-
-		return this.prisma.dojoMentor.delete({
-			where: { id }
-		})
-	}
-
 	// This method is used to sync the DojoMentor entity based on whether the user has the MENTOR role or not.
 	async syncDojoMentorEntity(
 		tx: Prisma.TransactionClient,

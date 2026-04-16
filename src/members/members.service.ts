@@ -118,13 +118,6 @@ export class MembersService {
 		return this.getById(id)
 	}
 
-	async delete(id: string) {
-		const member = await this.prisma.member.findUnique({ where: { id } })
-		if (!member) throw new NotFoundException('Member not found')
-
-		await this.prisma.member.delete({ where: { id } })
-	}
-
 	// This method is used to sync the Member entity based on whether the user has the MEMBER role or not.
 	async syncMemberEntity(tx: Prisma.TransactionClient, profileId: string, hasMemberRole: boolean) {
 		if (!hasMemberRole) {

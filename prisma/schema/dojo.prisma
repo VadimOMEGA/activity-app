@@ -24,7 +24,7 @@ model DojoTutor {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    dojoNinja                DojoNinja?
+    dojoNinjas               DojoNinja[]
     tutorAgreementSignatures TutorAgreementSignature[]
 
     @@map("dojo_tutors")
@@ -36,7 +36,7 @@ model DojoNinja {
     profileId String  @unique @map("profile_id")
     profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    tutorId String    @unique @map("tutor_id")
+    tutorId String    @map("tutor_id")
     tutor   DojoTutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
     usefulInfo String @map("useful_info")
@@ -84,15 +84,15 @@ model MentorAgreementSignature {
     mentorId String     @map("mentor_id")
     mentor   DojoMentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
 
-    docuementId String            @map("document_id")
-    document    AgreementDocument @relation(fields: [docuementId], references: [id], onDelete: Cascade)
+    documentId String            @map("document_id")
+    document   AgreementDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
     signedAt DateTime @map("signed_at")
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@unique([mentorId, docuementId])
+    @@unique([mentorId, documentId])
     @@map("mentor_agreement_signatures")
 }
 
@@ -102,14 +102,14 @@ model TutorAgreementSignature {
     tutorId String    @map("tutor_id")
     tutor   DojoTutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
-    docuementId String            @map("document_id")
-    document    AgreementDocument @relation(fields: [docuementId], references: [id], onDelete: Cascade)
+    documentId String            @map("document_id")
+    document   AgreementDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
     signedAt DateTime @map("signed_at")
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@unique([tutorId, docuementId])
+    @@unique([tutorId, documentId])
     @@map("tutor_agreement_signatures")
 }

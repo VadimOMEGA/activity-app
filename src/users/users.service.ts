@@ -242,6 +242,5 @@ export class UsersService {
 			profileId,
 			desiredRoleNames.has(RoleName.MENTOR)
 		)
-		// TODO: await this.syncTutorEntity(tx, profileId, desiredRoleNames.has(RoleName.TUTOR))
 	}
 }

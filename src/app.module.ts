@@ -9,8 +9,10 @@ import { MembershipFeesModule } from './membership-fees/membership-fees.module';
 import { GeneralAssembliesModule } from './general-assemblies/general-assemblies.module';
 import { MeetupsModule } from './meetups/meetups.module';
 import { DojoMentorModule } from './dojo-mentor/dojo-mentor.module';
+import { DojoTutorModule } from './dojo-tutor/dojo-tutor.module';
+import { DojoNinjaModule } from './dojo-ninja/dojo-ninja.module';
 
 @Module({
-	imports: [ConfigModule.forRoot(), AuthModule, UsersModule, RolesModule, ProfilesModule, MembersModule, MembershipFeesModule, GeneralAssembliesModule, MeetupsModule, DojoMentorModule]
+	imports: [ConfigModule.forRoot(), AuthModule, UsersModule, RolesModule, ProfilesModule, MembersModule, MembershipFeesModule, GeneralAssembliesModule, MeetupsModule, DojoMentorModule, DojoTutorModule, DojoNinjaModule]
 })
 export class AppModule {}

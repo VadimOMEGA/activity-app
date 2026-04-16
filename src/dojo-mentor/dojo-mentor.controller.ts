@@ -1,7 +1,6 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	HttpCode,
 	Param,
@@ -37,12 +36,5 @@ export class DojoMentorController {
 	@Auth('ADMIN')
 	update(@Param('id') id: string, @Body() dto: UpdateDojoMentorDto) {
 		return this.dojoMentorService.update(id, dto)
-	}
-
-	@HttpCode(200)
-	@Delete(':id')
-	@Auth('ADMIN')
-	delete(@Param('id') id: string) {
-		return this.dojoMentorService.delete(id)
 	}
 }

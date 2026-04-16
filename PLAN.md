@@ -232,11 +232,20 @@ DTO validări recomandate pe entități core:
 - AntiWorkshop DTO: 
   - meetupId `IsString`; 
   - agenda `IsOptional` `IsString` `MaxLength(5000)`
-- DojoMentor DTO: profileId IsInt; description IsOptional IsString MaxLength(2000)
-- DojoTutor DTO: profileId IsInt
-- DojoNinja DTO: profileId IsInt; tutorId IsInt; usefulInfo IsOptional IsString MaxLength(2000)
-- DojoSession DTO: startsAt IsDateString; location IsString MinLength(2) MaxLength(255); theme
-  IsOptional IsString MaxLength(255); mentorId IsInt
+- DojoMentor DTO: 
+  - profileId `IsString`; 
+  - description `IsString` `MaxLength(2000)`
+- DojoTutor DTO: 
+  - extinde de la `ProfileDTO`
+- DojoNinja DTO: 
+  - extinde de la `ProfileDTO`
+  - tutorId `IsString`; 
+  - usefulInfo `IsString` `MaxLength(2000)` `@MinLength(3)`
+- DojoSession DTO: 
+  - startsAt `IsDateString`; 
+  - location `IsString` `MinLength(2)` `MaxLength(255)`; 
+  - theme `IsString` `MaxLength(255)`; 
+  - mentorId `IsString`
 - AgreementSignature DTO: mentorId/tutorId IsInt; documentId IsInt; signedAt IsDateString
 - GeneralAssembly DTO: year IsInt Min(2020) Max(2100); announcedAt IsOptional IsDateString; heldAt
   IsOptional IsDateString; location IsOptional IsString MaxLength(255); minQuorum IsOptional IsInt

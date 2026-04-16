@@ -24,13 +24,7 @@ async function main() {
 		throw new Error('Missing env vars: SEED_ADMIN_USERNAME, SEED_ADMIN_PASSWORD, SEED_ADMIN_EMAIL')
 	}
 
-	const systemRoles: RoleName[] = [
-		RoleName.USER,
-		RoleName.ADMIN,
-		RoleName.MEMBER,
-		RoleName.MENTOR,
-		RoleName.TUTOR
-	]
+	const systemRoles: RoleName[] = [RoleName.USER, RoleName.ADMIN, RoleName.MEMBER, RoleName.MENTOR]
 
 	const seededRoles = await Promise.all(
 		systemRoles.map((roleName) =>
