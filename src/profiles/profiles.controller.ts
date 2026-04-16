@@ -1,7 +1,6 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	HttpCode,
 	Param,
@@ -45,12 +44,5 @@ export class ProfilesController {
 	@Put(':id')
 	update(@Param('id') id: string, @Body() dto: UpdateProfileDto, @Req() req: AuthenticatedRequest) {
 		return this.profilesService.update(id, dto, req.user?.id)
-	}
-
-	@HttpCode(200)
-	@Delete(':id')
-	@Auth()
-	delete(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-		return this.profilesService.delete(id, req.user?.id)
 	}
 }

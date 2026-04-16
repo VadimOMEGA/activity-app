@@ -3,9 +3,10 @@ import { UsersService } from './users.service'
 import { UsersController } from './users.controller'
 import { PrismaService } from 'src/prisma.service'
 import { ProfilesModule } from 'src/profiles/profiles.module'
+import { MembersModule } from 'src/members/members.module'
 
 @Module({
-	imports: [ProfilesModule],
+	imports: [ProfilesModule, MembersModule],
 	controllers: [UsersController],
 	providers: [UsersService, PrismaService],
 	exports: [UsersService]

@@ -19,7 +19,7 @@ model GeneralAssemblyAttendee {
     assemblyId String          @map("assembly_id")
     assembly   GeneralAssembly @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
 
-    memberId   String          @unique @map("member_id")
+    memberId   String          @map("member_id")
     member     Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
     createdAt  DateTime        @default(now()) @map("created_at")

@@ -27,12 +27,14 @@ export class UsersController {
 
 	@HttpCode(200)
 	@Get(':id')
+	@Auth('USER')
 	getById(@Param('id') id: string) {
 		return this.usersService.getById(id)
 	}
 
 	@HttpCode(200)
 	@Get('username/:username')
+	@Auth('USER')
 	getByUsername(@Param('username') username: string) {
 		return this.usersService.getByUsername(username)
 	}
@@ -40,7 +42,7 @@ export class UsersController {
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
 	@Put('reset-password/:id')
-	@Auth()
+	@Auth('USER')
 	resetPassword(@Param('id') id: string, @Body() dto: ResetPasswordDto) {
 		return this.usersService.resetPassword(id, dto)
 	}
@@ -48,7 +50,7 @@ export class UsersController {
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
 	@Put('change-username/:id')
-	@Auth()
+	@Auth('USER')
 	changeUsername(@Param('id') id: string, @Body() dto: ChangeUsernameDto) {
 		return this.usersService.changeUsername(id, dto)
 	}

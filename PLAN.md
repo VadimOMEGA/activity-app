@@ -9,8 +9,8 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
 1. Faza 0: Setup proiect backend și standarde de lucru
 2. Faza 1: Modelare Prisma inițială pentru Identity + Membership + Meetups + Dojo + General Assembly
 3. Faza 2: Generarea tipurilor TypeScript
-4. Faza 3: Implementare NestJS Auth + RBAC
-5. Faza 4: Implementare module core (Profiles, Members, Meetups, Dojo, General Assembly)
+4. Faza 3: Implementare NestJS Auth + RBAC + Profiles
+5. Faza 4: Implementare module core (Members, Meetups, Dojo, General Assembly)
 6. Faza 5: Modelare Prisma pentru Festival + Blog
 7. Faza 6: Migrarea 0002 festival și trigger redeem limit
 8. Faza 7: Implementare module Festival + Blog
@@ -44,17 +44,18 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - `npm i --save-dev @types/passport-jwt`
    - `npm i date-fns`
 
-2. Configurezi Prisma cu SQLite: 
-    - `npx prisma init`
-    - în .env setezi `DATABASE_URL="file:./name.db"`
-    - în prisma/schema.prisma setezi provider sqlite
-   <a href="https://docs.nestjs.com/recipes/prisma"><small>Documentatie Prisma/NestJS</small></a>
-   <a href="https://docs.nestjs.com/techniques/configuration"><small>Config Module pentru
-   .env</small></a> <br>
+2. Configurezi Prisma cu SQLite:
+   - `npx prisma init`
+   - în .env setezi `DATABASE_URL="file:./name.db"`
+   - în prisma/schema.prisma setezi provider sqlite
+     <a href="https://docs.nestjs.com/recipes/prisma"><small>Documentatie Prisma/NestJS</small></a>
+     <a href="https://docs.nestjs.com/techniques/configuration"><small>Config Module pentru
+     .env</small></a> <br>
 
 3. Workflow standard pentru fiecare modul:
    - definești modelele în Prisma
-   - rulezi migrarea dupa fiecare model nou sau modificat cu `npx prisma migrate dev --name nume_migrare`
+   - rulezi migrarea dupa fiecare model nou sau modificat cu
+     `npx prisma migrate dev --name nume_migrare`
    - generezi modul, service, controller NestJS
    - creezi DTO-uri cu validări explicite
    - implementezi service
@@ -97,6 +98,7 @@ Members (CTI):
 - members: PK id; FK profile_id -> profiles.id (UNIQUE), joined_at, created_at, updated_at
 - aspiring_members: PK/FK member_id -> members.id
 - full_members: PK/FK member_id -> members.id; full_member_kind CHECK founder|honorary|regular
+
 ```
 <!-- Using an enum -->
 enum FullMemberKind {
@@ -105,7 +107,9 @@ enum FullMemberKind {
     REGULAR
 }
 ```
+
 - membership_fees: PK id; FK member_id -> members.id; year, amount, status; UNIQUE(member_id, year)
+
 ```
 <!-- enum for status -->
 enum MembershipFeeStatus {
@@ -119,6 +123,7 @@ Meetups:
 - meetups: PK id; starts_at, location, created_at, updated_at
 - meetup_workshops: PK id; FK meetup_id -> meetups.id (UNIQUE), FK presenter_id -> profiles.id,
   title, theme CHECK demo_your_stack|fup_nights|meet_the_business
+
 ```
 <!-- enum for theme -->
 enum WorkshopTheme {
@@ -127,14 +132,17 @@ enum WorkshopTheme {
     MEET_THE_BUSINESS
 }
 ```
+
 - meetup_anti_workshops: PK id; FK meetup_id -> meetups.id (UNIQUE), agenda
 
 Dojo:
 
 - dojo_mentors: PK id; FK profile_id -> profiles.id, description
 - dojo_tutors: PK id; FK profile_id -> profiles.id
-- dojo_ninjas: PK id; FK profile_id -> profiles.id; FK tutor_id -> dojo_tutors.id (UNIQUE); useful_info
-  - a tutor can't exist without a ninja, but a ninja can exist without a tutor (e.g. if they are just starting)
+- dojo_ninjas: PK id; FK profile_id -> profiles.id; FK tutor_id -> dojo_tutors.id (UNIQUE);
+  useful_info
+  - a tutor can't exist without a ninja, but a ninja can exist without a tutor (e.g. if they are
+    just starting)
 - dojo_sessions: PK id; starts_at, location, theme, FK mentor_id -> dojo_mentors.id
 - agreement_documents: PK id; name - for display, slug UNIQUE - for URL
 - mentor_agreement_signatures: PK id; FK mentor_id -> dojo_mentors.id; FK document_id ->
@@ -152,8 +160,8 @@ General Assembly:
 ## Faza 2: Generarea tipurilor TypeScript
 
 Generezi tipurile TypeScript pentru Prisma Client:
-- npx prisma generate
 
+- npx prisma generate
 
 ## Faza 3: Auth + RBAC (prima implementare în NestJS)
 
@@ -165,7 +173,8 @@ Generezi tipurile TypeScript pentru Prisma Client:
 
 - JWT access + refresh tokens
 - parole hash cu argon2
-- JwtAuthGuard + RolesGuard combinate cu decorator @Auth('NumeRol1', 'NumeRol2') pentru protecția endpoint-urilor
+- JwtAuthGuard + RolesGuard combinate cu decorator @Auth('NumeRol1', 'NumeRol2') pentru protecția
+  endpoint-urilor
 
 3. Endpoint-uri minime:
 
@@ -181,7 +190,7 @@ Generezi tipurile TypeScript pentru Prisma Client:
 
 Ordine recomandată în implementare:
 
-1. Profiles
+1. Profiles ( Deja implementat, am avut nevoie la users )
 2. Members
 3. Meetups
 4. Dojo
@@ -190,19 +199,28 @@ Ordine recomandată în implementare:
 Workflow repetabil per modul:
 
 - generezi modul/service/controller
-- creezi dto/create, dto/update, dto/query
+- creezi dto-uri
 - implementezi service cu Prisma
 - implementezi controller
 - pui guard-uri pe operații de scriere
 
 DTO validări recomandate pe entități core:
 
-- Profile DTO: name IsString MinLength(2) MaxLength(120); email IsOptional IsEmail; phone IsOptional
-  Matches regex telefon; birthDate IsOptional IsDateString
-- Member DTO: profileId IsInt Min(1); joinedAt IsDateString; memberType IsIn aspiring|full;
-  fullMemberKind IsOptional IsIn founder|honorary|regular
-- MembershipFee DTO: memberId IsInt Min(1); year IsInt Min(2000) Max(2100); amount IsNumber
-  MaxDecimalPlaces(2) Min(0); status IsIn pending|paid|waived
+- Profile DTO: 
+  - name IsString MinLength(2) MaxLength(120)
+  - email IsEmail
+  - phone IsPhoneNumber('RO')
+  - birthDate IsDateString
+- Member DTO: 
+  - profileId IsString
+  - joinedAt IsDateString, IsOptional - it will default to now(); 
+  - memberType IsEnum(MemberType); 
+  - fullMemberKind ValidateIf(MemberType.FULL) then check for IsEnum(FullMemberKind)
+- MembershipFee DTO: 
+  - memberId IsSring; 
+  - year IsInt Min(2000) Max(2100); 
+  - amount IsNumber MaxDecimalPlaces(2) Min(0)
+  - status IsEnum(MembershipFeeStatus)
 - Meetup DTO: startsAt IsDateString; location IsString MinLength(2) MaxLength(255)
 - MeetupWorkshop DTO: meetupId IsInt; presenterId IsInt; title IsString MinLength(3) MaxLength(150);
   theme IsIn demo_your_stack|fup_nights|meet_the_business

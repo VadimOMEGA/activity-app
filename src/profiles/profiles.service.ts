@@ -84,28 +84,6 @@ export class ProfilesService {
 		return this.prisma.profile.update({ where: { id }, data: dto })
 	}
 
-	async delete(id: string, actorId?: string) {
-		if (!actorId) throw new UnauthorizedException('Missing authenticated user')
-
-		const profile = await this.prisma.profile.findUnique({
-			where: { id },
-			select: {
-				id: true,
-				user: {
-					select: {
-						id: true
-					}
-				}
-			}
-		})
-		if (!profile || !profile.user) throw new NotFoundException('Profile not found')
-
-		const canManage = await this.canManageProfile(actorId, profile.user.id)
-		if (!canManage) throw new ForbiddenException('You can delete only your own profile')
-
-		return this.prisma.profile.delete({ where: { id } })
-	}
-
 	private async canManageProfile(actorId: string, targetUserId: string) {
 		if (actorId === targetUserId) return true
 

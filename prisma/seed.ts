@@ -24,17 +24,31 @@ async function main() {
 		throw new Error('Missing env vars: SEED_ADMIN_USERNAME, SEED_ADMIN_PASSWORD, SEED_ADMIN_EMAIL')
 	}
 
-	const adminRole = await prisma.role.upsert({
-		where: { name: RoleName.ADMIN },
-		update: {},
-		create: { name: RoleName.ADMIN }
-	})
+	const systemRoles: RoleName[] = [
+		RoleName.USER,
+		RoleName.ADMIN,
+		RoleName.MEMBER,
+		RoleName.MENTOR,
+		RoleName.TUTOR
+	]
 
-	await prisma.role.upsert({
-		where: { name: RoleName.USER },
-		update: {},
-		create: { name: RoleName.USER }
-	})
+	const seededRoles = await Promise.all(
+		systemRoles.map((roleName) =>
+			prisma.role.upsert({
+				where: { name: roleName },
+				update: {},
+				create: { name: roleName }
+			})
+		)
+	)
+
+	const roleIdByName = new Map(seededRoles.map((role) => [role.name, role.id]))
+	const adminRoleId = roleIdByName.get(RoleName.ADMIN)
+	const userRoleId = roleIdByName.get(RoleName.USER)
+
+	if (!adminRoleId || !userRoleId) {
+		throw new Error('Failed to seed required roles: ADMIN and USER')
+	}
 
 	const profile = await prisma.profile.upsert({
 		where: { email: adminEmail },
@@ -69,15 +83,35 @@ async function main() {
 		where: {
 			userId_roleId: {
 				userId: user.id,
-				roleId: adminRole.id
+				roleId: adminRoleId
 			}
 		},
 		update: {},
 		create: {
 			userId: user.id,
-			roleId: adminRole.id
+			roleId: adminRoleId
 		}
 	})
+
+	const allUsers = await prisma.user.findMany({
+		select: { id: true }
+	})
+
+	for (const existingUser of allUsers) {
+		await prisma.userRole.upsert({
+			where: {
+				userId_roleId: {
+					userId: existingUser.id,
+					roleId: userRoleId
+				}
+			},
+			update: {},
+			create: {
+				userId: existingUser.id,
+				roleId: userRoleId
+			}
+		})
+	}
 }
 
 main()
