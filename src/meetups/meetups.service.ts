@@ -60,6 +60,13 @@ export class MeetupsService {
 	}
 
 	async createWorkshop(dto: WorkshopMeetupDto) {
+		const presenter = await this.prisma.profile.findUnique({
+			where: { id: dto.presenterId },
+			select: { id: true }
+		})
+
+		if (!presenter) throw new NotFoundException('Presenter not found')
+
 		const meetup = await this.prisma.meetup.create({
 			data: {
 				startsAt: new Date(dto.startsAt),
@@ -108,6 +115,15 @@ export class MeetupsService {
 
 		if (!dto || Object.keys(dto).length === 0)
 			throw new BadRequestException('No data provided for update')
+
+		if (dto.presenterId !== undefined) {
+			const presenter = await this.prisma.profile.findUnique({
+				where: { id: dto.presenterId },
+				select: { id: true }
+			})
+
+			if (!presenter) throw new NotFoundException('Presenter not found')
+		}
 
 		await this.prisma.meetup.update({
 			where: { id },

@@ -11,8 +11,9 @@ import { MeetupsModule } from './meetups/meetups.module';
 import { DojoMentorModule } from './dojo-mentor/dojo-mentor.module';
 import { DojoTutorModule } from './dojo-tutor/dojo-tutor.module';
 import { DojoNinjaModule } from './dojo-ninja/dojo-ninja.module';
+import { DojoSessionsModule } from './dojo-sessions/dojo-sessions.module';
 
 @Module({
-	imports: [ConfigModule.forRoot(), AuthModule, UsersModule, RolesModule, ProfilesModule, MembersModule, MembershipFeesModule, GeneralAssembliesModule, MeetupsModule, DojoMentorModule, DojoTutorModule, DojoNinjaModule]
+	imports: [ConfigModule.forRoot(), AuthModule, UsersModule, RolesModule, ProfilesModule, MembersModule, MembershipFeesModule, GeneralAssembliesModule, MeetupsModule, DojoMentorModule, DojoTutorModule, DojoNinjaModule, DojoSessionsModule]
 })
 export class AppModule {}
