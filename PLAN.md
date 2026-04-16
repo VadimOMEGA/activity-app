@@ -207,24 +207,31 @@ Workflow repetabil per modul:
 DTO validări recomandate pe entități core:
 
 - Profile DTO: 
-  - name IsString MinLength(2) MaxLength(120)
-  - email IsEmail
-  - phone IsPhoneNumber('RO')
-  - birthDate IsDateString
+  - name `IsString MinLength(2)` `MaxLength(120)`
+  - email `IsEmail`
+  - phone `IsPhoneNumber('RO')`
+  - birthDate `IsDateString`
 - Member DTO: 
-  - profileId IsString
-  - joinedAt IsDateString, IsOptional - it will default to now(); 
-  - memberType IsEnum(MemberType); 
-  - fullMemberKind ValidateIf(MemberType.FULL) then check for IsEnum(FullMemberKind)
+  - profileId `IsString`
+  - joinedAt `IsDateString`, `IsOptional`- it will default to `now()`; 
+  - memberType `IsEnum(MemberType)`; 
+  - fullMemberKind `ValidateIf(MemberType.FULL)` then check for `IsEnum(FullMemberKind)`
 - MembershipFee DTO: 
-  - memberId IsSring; 
-  - year IsInt Min(2000) Max(2100); 
-  - amount IsNumber MaxDecimalPlaces(2) Min(0)
-  - status IsEnum(MembershipFeeStatus)
-- Meetup DTO: startsAt IsDateString; location IsString MinLength(2) MaxLength(255)
-- MeetupWorkshop DTO: meetupId IsInt; presenterId IsInt; title IsString MinLength(3) MaxLength(150);
-  theme IsIn demo_your_stack|fup_nights|meet_the_business
-- AntiWorkshop DTO: meetupId IsInt; agenda IsOptional IsString MaxLength(5000)
+  - memberId `IsSring`; 
+  - year `IsInt` `Min(2000)` `Max(2100)`; 
+  - amount `IsNumber` `MaxDecimalPlaces(2)` `Min(0)`
+  - status `IsEnum(MembershipFeeStatus)`
+- Meetup DTO: 
+  - startsAt `IsDateString`; 
+  - location `IsString` `MinLength(2)` `MaxLength(255)`
+- MeetupWorkshop DTO: 
+  - meetupId IsInt; 
+  - presenterId `IsString` 
+  - title `IsString` `MinLength(3)` `MaxLength(150)`;
+  - theme `IsEnum(WorkshopTheme)`
+- AntiWorkshop DTO: 
+  - meetupId `IsString`; 
+  - agenda `IsOptional` `IsString` `MaxLength(5000)`
 - DojoMentor DTO: profileId IsInt; description IsOptional IsString MaxLength(2000)
 - DojoTutor DTO: profileId IsInt
 - DojoNinja DTO: profileId IsInt; tutorId IsInt; usefulInfo IsOptional IsString MaxLength(2000)

@@ -8,6 +8,7 @@ import { hash, verify } from 'argon2'
 
 import { ChangeUsernameDto, ResetPasswordDto } from 'src/auth/dto/auth.dto'
 import { RegisterDto } from 'src/auth/dto/register.dto'
+import { DojoMentorService } from 'src/dojo-mentor/dojo-mentor.service'
 import { Prisma } from 'src/generated/prisma/client'
 import { RoleName } from 'src/generated/prisma/enums'
 import { MembersService } from 'src/members/members.service'
@@ -18,7 +19,8 @@ import { RolesAssignDto } from 'src/roles/dto/role.dto'
 export class UsersService {
 	constructor(
 		private prisma: PrismaService,
-		private membersService: MembersService
+		private membersService: MembersService,
+		private dojoMentorService: DojoMentorService
 	) {}
 
 	getAll() {
@@ -235,8 +237,11 @@ export class UsersService {
 		desiredRoleNames: Set<RoleName>
 	) {
 		await this.membersService.syncMemberEntity(tx, profileId, desiredRoleNames.has(RoleName.MEMBER))
-
-		// TODO: await this.syncMentorEntity(tx, profileId, desiredRoleNames.has(RoleName.MENTOR))
+		await this.dojoMentorService.syncDojoMentorEntity(
+			tx,
+			profileId,
+			desiredRoleNames.has(RoleName.MENTOR)
+		)
 		// TODO: await this.syncTutorEntity(tx, profileId, desiredRoleNames.has(RoleName.TUTOR))
 	}
 }

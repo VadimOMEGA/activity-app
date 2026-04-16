@@ -5,6 +5,11 @@ enum WorkshopTheme {
     MEET_THE_BUSINESS
 }
 
+enum MeetupType {
+    WORKSHOP
+    ANTI_WORKSHOP
+}
+
 model Meetup {
     id                 String              @id @default(cuid())
 
