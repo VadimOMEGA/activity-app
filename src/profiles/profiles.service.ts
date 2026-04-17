@@ -29,6 +29,12 @@ export class ProfilesService {
 						}
 					}
 				}
+			},
+			include: {
+				member: true,
+				dojoMentor: true,
+				dojoTutor: true,
+				dojoNinja: true
 			}
 		})
 	}
