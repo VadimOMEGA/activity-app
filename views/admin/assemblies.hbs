@@ -1,0 +1,126 @@
+{{> head}}
+<div class="page-header">
+	<h1>General Assemblies</h1>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openAssemblyModal()"><i class="bi bi-plus-lg me-1"></i>New Assembly</button>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead><tr><th>Year</th><th>Announced</th><th>Held</th><th>Location</th><th>Quorum</th><th>Attendees</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each assemblies}}
+			<tr>
+				<td><strong>{{this.year}}</strong></td>
+				<td>{{formatDate this.announcedAt}}</td>
+				<td>{{formatDate this.heldAt}}</td>
+				<td>{{this.location}}</td>
+				<td>{{this.minQuorum}}</td>
+				<td><span class="badge bg-secondary">{{this.generalAssemblyAttendees.length}}</span></td>
+				{{#if ../canEdit}}
+				<td class="text-end">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit" onclick='openEditAssembly({{{json this}}})'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-teal btn-sm me-1" title="Attendees" onclick='openAttendeesModal("{{this.id}}", {{{json this.generalAssemblyAttendees}}})'>
+						<i class="bi bi-people"></i>
+					</button>
+					<button class="btn btn-outline-danger btn-sm" title="Delete" onclick='deleteAssembly("{{this.id}}")'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless assemblies.length}}
+<div class="text-center text-secondary py-5"><i class="bi bi-bank2 display-4"></i><p class="mt-2">No assemblies</p></div>
+{{/unless}}
+
+<!-- Assembly Modal -->
+<div class="modal fade" id="assemblyModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="assemblyTitle">New Assembly</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="assemblyId">
+			<div class="mb-3"><label class="form-label">Year</label><input type="number" class="form-control" id="asmYear" min="2020" max="2100"></div>
+			<div class="mb-3"><label class="form-label">Announced At</label><input type="datetime-local" class="form-control" id="asmAnnounced"></div>
+			<div class="mb-3"><label class="form-label">Held At</label><input type="datetime-local" class="form-control" id="asmHeld"></div>
+			<div class="mb-3"><label class="form-label">Location</label><input type="text" class="form-control" id="asmLocation"></div>
+			<div class="mb-3"><label class="form-label">Min Quorum</label><input type="number" class="form-control" id="asmQuorum" min="1"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveAssembly()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Attendees Modal -->
+<div class="modal fade" id="attendeesModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Manage Attendees</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body" id="attendeesBody" style="max-height:60vh;overflow-y:auto;"></div>
+	</div></div>
+</div>
+
+<script>
+const allMembers = {{{json members}}}
+let currentAssemblyId = null
+let currentAttendees = []
+
+document.querySelectorAll('td').forEach(td=>{if(td.textContent&&td.textContent.match(/^\d{4}-\d{2}-\d{2}T/))td.textContent=formatDate(td.textContent)})
+
+function openAssemblyModal(){document.getElementById('assemblyId').value='';document.getElementById('asmYear').value=new Date().getFullYear();document.getElementById('asmAnnounced').value='';document.getElementById('asmHeld').value='';document.getElementById('asmLocation').value='';document.getElementById('asmQuorum').value='';document.getElementById('assemblyTitle').textContent='New Assembly';new bootstrap.Modal(document.getElementById('assemblyModal')).show()}
+
+function openEditAssembly(a){document.getElementById('assemblyId').value=a.id;document.getElementById('asmYear').value=a.year;document.getElementById('asmAnnounced').value=a.announcedAt?a.announcedAt.substring(0,16):'';document.getElementById('asmHeld').value=a.heldAt?a.heldAt.substring(0,16):'';document.getElementById('asmLocation').value=a.location||'';document.getElementById('asmQuorum').value=a.minQuorum;document.getElementById('assemblyTitle').textContent='Edit Assembly';new bootstrap.Modal(document.getElementById('assemblyModal')).show()}
+
+async function saveAssembly(){const id=document.getElementById('assemblyId').value;const body={year:parseInt(document.getElementById('asmYear').value),announcedAt:new Date(document.getElementById('asmAnnounced').value).toISOString(),heldAt:new Date(document.getElementById('asmHeld').value).toISOString(),location:document.getElementById('asmLocation').value,minQuorum:parseInt(document.getElementById('asmQuorum').value)};try{if(id){await apiCall(`/api/general-assemblies/${id}`,'PATCH',body);showToast('Updated')}else{await apiCall('/api/general-assemblies','POST',body);showToast('Created')}bootstrap.Modal.getInstance(document.getElementById('assemblyModal')).hide();setTimeout(()=>reloadPage(),500)}catch(e){showToast(e.message,'error')}}
+
+function deleteAssembly(id){confirmDelete('this assembly',async()=>{await apiCall(`/api/general-assemblies/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})}
+
+// Attendees
+function openAttendeesModal(assemblyId, attendees){currentAssemblyId=assemblyId;currentAttendees=attendees||[];renderAttendees();new bootstrap.Modal(document.getElementById('attendeesModal')).show()}
+
+function renderAttendees(){
+	const body=document.getElementById('attendeesBody')
+	const attendeeIds=new Set(currentAttendees.map(a=>a.memberId))
+	let html=''
+	allMembers.forEach(m=>{
+		const checked=attendeeIds.has(m.id)
+		html+=`<div class="form-check mb-2 d-flex align-items-center gap-2" id="att-row-${m.id}">`
+		html+=`<input class="form-check-input" type="checkbox" id="att-${m.id}" ${checked?'checked':''} onchange="toggleAttendee('${m.id}', this.checked)">`
+		html+=`<label class="form-check-label" for="att-${m.id}">${escapeHtml(m.profile.name)} <small class="text-secondary">(${escapeHtml(m.profile.email)})</small></label>`
+		html+=`<span class="spinner-border spinner-border-sm text-teal d-none ms-auto" id="att-spin-${m.id}"></span>`
+		html+=`</div>`
+	})
+	body.innerHTML=html
+}
+
+async function toggleAttendee(memberId, checked){
+	const spinner=document.getElementById('att-spin-'+memberId)
+	const row=document.getElementById('att-row-'+memberId)
+	const checkbox=document.getElementById('att-'+memberId)
+	spinner.classList.remove('d-none')
+	row.classList.add('row-loader')
+	try{
+		if(checked){
+			await apiCall(`/api/general-assemblies/${currentAssemblyId}/attendees`,'POST',{memberId})
+			currentAttendees.push({memberId,assemblyId:currentAssemblyId})
+			showToast('Attendee added')
+		}else{
+			await apiCall(`/api/general-assemblies/${currentAssemblyId}/attendees`,'POST',{memberId,remove:true})
+			currentAttendees=currentAttendees.filter(a=>a.memberId!==memberId)
+			showToast('Attendee removed')
+		}
+	}catch(e){
+		checkbox.checked=!checked
+		showToast(e.message,'error')
+	}
+	spinner.classList.add('d-none')
+	row.classList.remove('row-loader')
+}
+</script>
+
+{{> foot}}

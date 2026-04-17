@@ -87,7 +87,12 @@ export class ProfilesService {
 				throw new BadRequestException('Email already in use')
 		}
 
-		return this.prisma.profile.update({ where: { id }, data: dto })
+		return this.prisma.profile.update({ where: { id }, data: {
+			birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+			phone: dto.phone,
+			name: dto.name,
+			email: dto.email
+		} })
 	}
 
 	private async canManageProfile(actorId: string, targetUserId: string) {

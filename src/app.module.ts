@@ -16,6 +16,7 @@ import { S3Module } from './s3/s3.module';
 import { AgreementDocumentsModule } from './agreement-documents/agreement-documents.module';
 import { MentorAgreementSignaturesModule } from './mentor-agreement-signatures/mentor-agreement-signatures.module';
 import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tutor-agreement-signatures.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -35,7 +36,8 @@ import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tut
 		S3Module,
 		AgreementDocumentsModule,
 		MentorAgreementSignaturesModule,
-		TutorAgreementSignaturesModule
+		TutorAgreementSignaturesModule,
+		AdminModule
 	]
 })
 export class AppModule {}

@@ -1,0 +1,106 @@
+{{> head}}
+<div class="page-header">
+	<h1>Agreement Documents</h1>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openDocModal()"><i class="bi bi-plus-lg me-1"></i>New Document</button>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead><tr><th>Name</th><th>Slug</th><th>Created</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each documents}}
+			<tr>
+				<td>{{this.name}}</td>
+				<td><code>{{this.slug}}</code></td>
+				<td>{{formatDate this.createdAt}}</td>
+				{{#if ../canEdit}}
+				<td class="text-end">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit Name" onclick='openEditDocModal("{{this.id}}", "{{this.name}}")'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-teal btn-sm me-1" title="Download" onclick='downloadDoc("{{this.slug}}")'>
+						<i class="bi bi-download"></i>
+					</button>
+					<button class="btn btn-outline-danger btn-sm" title="Delete" onclick='deleteDoc("{{this.id}}", "{{this.name}}")'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless documents.length}}
+<div class="text-center text-secondary py-5"><i class="bi bi-file-earmark-text display-4"></i><p class="mt-2">No documents</p></div>
+{{/unless}}
+
+<!-- Create Document Modal -->
+<div class="modal fade" id="createDocModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content" style="position:relative;">
+		<div class="modal-header"><h5 class="modal-title">New Document</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="docName"></div>
+			<div class="mb-3"><label class="form-label">Slug</label><input type="text" class="form-control" id="docSlug" placeholder="e.g. mentor-agreement-2024"></div>
+			<div class="mb-3"><label class="form-label">File</label><input type="file" class="form-control" id="docFile"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="createDocument()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Edit Document Name Modal -->
+<div class="modal fade" id="editDocModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Edit Document Name</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="editDocId">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="editDocName"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveDocName()">Save</button></div>
+	</div></div>
+</div>
+
+<script>
+document.querySelectorAll('td').forEach(td=>{if(td.textContent&&td.textContent.match(/^\d{4}-\d{2}-\d{2}T/))td.textContent=formatDate(td.textContent)})
+
+function openDocModal(){document.getElementById('docName').value='';document.getElementById('docSlug').value='';document.getElementById('docFile').value='';new bootstrap.Modal(document.getElementById('createDocModal')).show()}
+
+async function createDocument(){
+	const modal=document.getElementById('createDocModal')
+	const name=document.getElementById('docName').value
+	const slug=document.getElementById('docSlug').value
+	const fileInput=document.getElementById('docFile')
+	const file=fileInput.files[0]
+	if(!name||!slug||!file)return showToast('Fill all fields','error')
+
+	showModalLoader(modal,'Uploading...')
+	try{
+		// Step 1: create with upload intent
+		const intent=await apiCall('/api/agreement-documents/create-with-upload-intent','POST',{name,slug,fileName:file.name,contentType:file.type})
+		// Step 2: upload file to presigned URL
+		await fetch(intent.presignedUploadUrl,{method:'PUT',body:file,headers:{'Content-Type':file.type}})
+		// Step 3: confirm upload
+		updateLoaderText(modal,'Confirming upload...')
+		await apiCall(`/api/agreement-documents/${intent.document.id}/confirm-upload`,'POST')
+		hideModalLoader(modal)
+		showToast('Document created')
+		bootstrap.Modal.getInstance(modal).hide()
+		setTimeout(()=>reloadPage(),500)
+	}catch(e){
+		hideModalLoader(modal)
+		showToast(e.message||'Upload failed','error')
+	}
+}
+
+function openEditDocModal(id,name){document.getElementById('editDocId').value=id;document.getElementById('editDocName').value=name;new bootstrap.Modal(document.getElementById('editDocModal')).show()}
+async function saveDocName(){const id=document.getElementById('editDocId').value;try{await apiCall(`/api/agreement-documents/${id}`,'PUT',{name:document.getElementById('editDocName').value});showToast('Updated');bootstrap.Modal.getInstance(document.getElementById('editDocModal')).hide();setTimeout(()=>reloadPage(),500)}catch(e){showToast(e.message,'error')}}
+
+async function downloadDoc(slug){try{const data=await apiCall(`/api/agreement-documents/slug/${slug}`);if(data.downloadUrl)window.open(data.downloadUrl,'_blank');else showToast('No download URL','error')}catch(e){showToast(e.message,'error')}}
+
+function deleteDoc(id,name){confirmDelete(name,async()=>{await apiCall(`/api/agreement-documents/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})}
+</script>
+
+{{> foot}}

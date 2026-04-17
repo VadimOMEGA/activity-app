@@ -1,0 +1,188 @@
+{{> head}}
+<div class="page-header">
+	<h1>CoderDojo — Mentors</h1>
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Email</th>
+				<th>Description</th>
+				<th>Sessions</th>
+				<th>Signatures</th>
+				{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}
+			</tr>
+		</thead>
+		<tbody>
+			{{#each mentors}}
+			<tr>
+				<td>{{this.profile.name}}</td>
+				<td>{{this.profile.email}}</td>
+				<td class="truncate">{{this.description}}</td>
+				<td><span class="badge bg-secondary">{{this.dojoSessions.length}}</span></td>
+				<td><span class="badge bg-secondary">{{this.mentorAgreementSignatures.length}}</span></td>
+				{{#if ../canEdit}}
+				<td class="text-end">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit Description"
+						onclick='openMentorEditModal("{{this.id}}", `{{this.description}}`)'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit Profile"
+						onclick='openProfileModal("{{this.profile.id}}", "{{this.profile.name}}", "{{this.profile.email}}", "{{this.profile.phone}}", "{{this.profile.birthDate}}")'>
+						<i class="bi bi-person"></i>
+					</button>
+					<button class="btn btn-outline-teal btn-sm" title="Manage Signatures"
+						onclick='openSignaturesModal("{{this.id}}", {{{json this.mentorAgreementSignatures}}})'>
+						<i class="bi bi-pen"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless mentors.length}}
+<div class="text-center text-secondary py-5">
+	<i class="bi bi-star display-4"></i>
+	<p class="mt-2">No mentors found</p>
+</div>
+{{/unless}}
+
+<!-- Edit Mentor Description Modal -->
+<div class="modal fade" id="mentorEditModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Edit Mentor Description</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="mentorEditId">
+				<div class="mb-3">
+					<label for="mentorDescription" class="form-label">Description</label>
+					<textarea class="form-control" id="mentorDescription" rows="4"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-teal btn-sm" onclick="saveMentorDescription()">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Signatures Modal -->
+<div class="modal fade" id="signaturesModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Manage Signatures</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="signaturesBody">
+				<!-- Populated via JS -->
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	const allDocuments = {{{json documents}}}
+	let currentMentorId = null
+	let currentSignatures = []
+
+	function openMentorEditModal(mentorId, description) {
+		document.getElementById('mentorEditId').value = mentorId
+		document.getElementById('mentorDescription').value = description || ''
+		new bootstrap.Modal(document.getElementById('mentorEditModal')).show()
+	}
+
+	async function saveMentorDescription() {
+		const id = document.getElementById('mentorEditId').value
+		const description = document.getElementById('mentorDescription').value
+
+		try {
+			await apiCall(`/api/dojo-mentors/${id}`, 'PUT', { description })
+			showToast('Description updated')
+			bootstrap.Modal.getInstance(document.getElementById('mentorEditModal')).hide()
+			setTimeout(() => reloadPage(), 500)
+		} catch (err) {
+			showToast(err.message || 'Failed to update', 'error')
+		}
+	}
+
+	function openSignaturesModal(mentorId, signatures) {
+		currentMentorId = mentorId
+		currentSignatures = signatures || []
+		renderSignatures()
+		new bootstrap.Modal(document.getElementById('signaturesModal')).show()
+	}
+
+	function renderSignatures() {
+		const body = document.getElementById('signaturesBody')
+		const signedDocIds = new Set(currentSignatures.map(s => s.documentId))
+
+		let html = '<table class="table table-dark table-sm table-hover mb-0"><thead><tr><th>Document</th><th class="text-end">Status</th></tr></thead><tbody>'
+
+		allDocuments.forEach(doc => {
+			const sig = currentSignatures.find(s => s.documentId === doc.id)
+			const isSigned = !!sig
+
+			html += `<tr id="sig-row-${doc.id}">`
+			html += `<td>${escapeHtml(doc.name)}</td>`
+			html += `<td class="text-end">`
+
+			if (isSigned) {
+				html += `<span class="text-success me-2"><i class="bi bi-check-circle-fill"></i> Signed ${formatDate(sig.signedAt)}</span>`
+				html += `<button class="btn btn-outline-danger btn-sm" onclick="removeSignature('${sig.id}', '${doc.id}')"><i class="bi bi-x-lg"></i> Remove</button>`
+			} else {
+				html += `<button class="btn btn-teal btn-sm" onclick="addSignature('${doc.id}')"><i class="bi bi-pen me-1"></i>Sign</button>`
+			}
+
+			html += `</td></tr>`
+		})
+
+		html += '</tbody></table>'
+		body.innerHTML = html
+	}
+
+	async function addSignature(documentId) {
+		const row = document.getElementById('sig-row-' + documentId)
+		row.classList.add('row-loader')
+
+		try {
+			const result = await apiCall('/api/mentor-agreement-signatures', 'POST', {
+				mentorId: currentMentorId,
+				documentId,
+				signedAt: new Date().toISOString()
+			})
+			currentSignatures.push(result)
+			renderSignatures()
+			showToast('Document signed')
+		} catch (err) {
+			showToast(err.message || 'Failed to sign', 'error')
+			row.classList.remove('row-loader')
+		}
+	}
+
+	async function removeSignature(signatureId, documentId) {
+		const row = document.getElementById('sig-row-' + documentId)
+		row.classList.add('row-loader')
+
+		try {
+			await apiCall(`/api/mentor-agreement-signatures/${signatureId}`, 'DELETE')
+			currentSignatures = currentSignatures.filter(s => s.id !== signatureId)
+			renderSignatures()
+			showToast('Signature removed')
+		} catch (err) {
+			showToast(err.message || 'Failed to remove', 'error')
+			row.classList.remove('row-loader')
+		}
+	}
+</script>
+
+{{> foot}}

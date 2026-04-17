@@ -1,0 +1,333 @@
+{{> head}}
+<div class="page-header">
+	<h1>Meetups</h1>
+	{{#if canEdit}}
+	<div class="dropdown">
+		<button class="btn btn-teal btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+			<i class="bi bi-plus-lg me-1"></i>New Meetup
+		</button>
+		<ul class="dropdown-menu dropdown-menu-dark">
+			<li><a class="dropdown-item" href="#" onclick="openMeetupModal('workshop')">Workshop</a></li>
+			<li><a class="dropdown-item" href="#" onclick="openMeetupModal('anti-workshop')">Anti-Workshop</a></li>
+		</ul>
+	</div>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Date</th>
+				<th>Location</th>
+				<th>Type</th>
+				<th>Title / Agenda</th>
+				<th>Presenter</th>
+				{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}
+			</tr>
+		</thead>
+		<tbody>
+			{{#each meetups}}
+			<tr>
+				<td>{{formatDate this.startsAt}}</td>
+				<td>{{this.location}}</td>
+				<td>
+					{{#if this.meetupWorkshop}}
+					<span class="badge bg-info">WORKSHOP</span>
+					{{else}}
+					<span class="badge bg-warning text-dark">ANTI-WORKSHOP</span>
+					{{/if}}
+				</td>
+				<td class="truncate">
+					{{#if this.meetupWorkshop}}
+					{{this.meetupWorkshop.title}}
+					<br><small class="text-secondary">{{this.meetupWorkshop.theme}}</small>
+					{{else if this.meetupAntiWorkshop}}
+					{{this.meetupAntiWorkshop.agenda}}
+					{{/if}}
+				</td>
+				<td>
+					{{#if this.meetupWorkshop}}
+					{{#if this.meetupWorkshop.presenter}}
+					{{this.meetupWorkshop.presenter.name}}
+					{{else}}<span class="text-secondary">—</span>{{/if}}
+					{{else}}<span class="text-secondary">—</span>{{/if}}
+				</td>
+				{{#if ../canEdit}}
+				<td class="text-end">
+					{{#if this.meetupWorkshop}}
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit"
+						onclick='openEditWorkshop({{{json this}}})'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					{{else}}
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit"
+						onclick='openEditAntiWorkshop({{{json this}}})'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					{{/if}}
+					<button class="btn btn-outline-danger btn-sm" title="Delete"
+						onclick='deleteMeetup("{{this.id}}")'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless meetups.length}}
+<div class="text-center text-secondary py-5">
+	<i class="bi bi-calendar-event display-4"></i>
+	<p class="mt-2">No meetups found</p>
+</div>
+{{/unless}}
+
+<!-- Workshop Modal -->
+<div class="modal fade" id="workshopModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="workshopModalTitle">New Workshop</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="workshopMeetupId">
+				<div class="row">
+					<div class="col-md-6 mb-3">
+						<label for="wsStartsAt" class="form-label">Date &amp; Time</label>
+						<input type="datetime-local" class="form-control" id="wsStartsAt">
+					</div>
+					<div class="col-md-6 mb-3">
+						<label for="wsLocation" class="form-label">Location</label>
+						<input type="text" class="form-control" id="wsLocation">
+					</div>
+				</div>
+				<div class="mb-3">
+					<label for="wsTitle" class="form-label">Title</label>
+					<input type="text" class="form-control" id="wsTitle">
+				</div>
+				<div class="mb-3">
+					<label for="wsTheme" class="form-label">Theme</label>
+					<select class="form-select" id="wsTheme">
+						<option value="DEMO_YOUR_STACK">Demo Your Stack</option>
+						<option value="FUP_NIGHTS">FUP Nights</option>
+						<option value="MEET_THE_BUSINESS">Meet The Business</option>
+					</select>
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Presenter</label>
+					<!-- Filters -->
+					<div class="d-flex gap-2 mb-2 flex-wrap">
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="checkbox" id="filterMentor" checked onchange="filterProfiles()">
+							<label class="form-check-label small" for="filterMentor">Mentor</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="checkbox" id="filterMember" checked onchange="filterProfiles()">
+							<label class="form-check-label small" for="filterMember">Member</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="checkbox" id="filterTutor" onchange="filterProfiles()">
+							<label class="form-check-label small" for="filterTutor">Tutor</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="checkbox" id="filterNinja" onchange="filterProfiles()">
+							<label class="form-check-label small" for="filterNinja">Ninja</label>
+						</div>
+					</div>
+					<select class="form-select" id="wsPresenter">
+						<option value="">— No presenter —</option>
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-teal btn-sm" onclick="saveWorkshop()">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Anti-Workshop Modal -->
+<div class="modal fade" id="antiWorkshopModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="antiWorkshopModalTitle">New Anti-Workshop</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="awMeetupId">
+				<div class="mb-3">
+					<label for="awStartsAt" class="form-label">Date &amp; Time</label>
+					<input type="datetime-local" class="form-control" id="awStartsAt">
+				</div>
+				<div class="mb-3">
+					<label for="awLocation" class="form-label">Location</label>
+					<input type="text" class="form-control" id="awLocation">
+				</div>
+				<div class="mb-3">
+					<label for="awAgenda" class="form-label">Agenda</label>
+					<textarea class="form-control" id="awAgenda" rows="4"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-teal btn-sm" onclick="saveAntiWorkshop()">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	// All profiles data for presenter dropdown
+	const allProfiles = {{{json profiles}}}
+
+	function getProfileType(p) {
+		if (p.dojoMentor) return 'MENTOR'
+		if (p.member) return 'MEMBER'
+		if (p.dojoTutor) return 'TUTOR'
+		if (p.dojoNinja) return 'NINJA'
+		return null
+	}
+
+	function filterProfiles() {
+		const showMentor = document.getElementById('filterMentor').checked
+		const showMember = document.getElementById('filterMember').checked
+		const showTutor = document.getElementById('filterTutor').checked
+		const showNinja = document.getElementById('filterNinja').checked
+
+		const select = document.getElementById('wsPresenter')
+		const currentVal = select.value
+		select.innerHTML = '<option value="">— No presenter —</option>'
+
+		allProfiles.forEach(p => {
+			const type = getProfileType(p)
+			const show = (!type) ||
+				(type === 'MENTOR' && showMentor) ||
+				(type === 'MEMBER' && showMember) ||
+				(type === 'TUTOR' && showTutor) ||
+				(type === 'NINJA' && showNinja)
+
+			if (show) {
+				const label = type ? `${p.name} [${type}]` : p.name
+				const opt = document.createElement('option')
+				opt.value = p.id
+				opt.textContent = label
+				select.appendChild(opt)
+			}
+		})
+
+		select.value = currentVal
+	}
+
+	// Initialize profiles dropdown
+	filterProfiles()
+
+	function openMeetupModal(type) {
+		if (type === 'workshop') {
+			document.getElementById('workshopMeetupId').value = ''
+			document.getElementById('wsStartsAt').value = ''
+			document.getElementById('wsLocation').value = ''
+			document.getElementById('wsTitle').value = ''
+			document.getElementById('wsTheme').value = 'DEMO_YOUR_STACK'
+			document.getElementById('wsPresenter').value = ''
+			document.getElementById('workshopModalTitle').textContent = 'New Workshop'
+			new bootstrap.Modal(document.getElementById('workshopModal')).show()
+		} else {
+			document.getElementById('awMeetupId').value = ''
+			document.getElementById('awStartsAt').value = ''
+			document.getElementById('awLocation').value = ''
+			document.getElementById('awAgenda').value = ''
+			document.getElementById('antiWorkshopModalTitle').textContent = 'New Anti-Workshop'
+			new bootstrap.Modal(document.getElementById('antiWorkshopModal')).show()
+		}
+	}
+
+	function openEditWorkshop(meetup) {
+		document.getElementById('workshopMeetupId').value = meetup.id
+		document.getElementById('wsStartsAt').value = meetup.startsAt ? meetup.startsAt.substring(0, 16) : ''
+		document.getElementById('wsLocation').value = meetup.location || ''
+		document.getElementById('wsTitle').value = meetup.meetupWorkshop?.title || ''
+		document.getElementById('wsTheme').value = meetup.meetupWorkshop?.theme || 'DEMO_YOUR_STACK'
+		document.getElementById('wsPresenter').value = meetup.meetupWorkshop?.presenterId || ''
+		document.getElementById('workshopModalTitle').textContent = 'Edit Workshop'
+		new bootstrap.Modal(document.getElementById('workshopModal')).show()
+	}
+
+	function openEditAntiWorkshop(meetup) {
+		document.getElementById('awMeetupId').value = meetup.id
+		document.getElementById('awStartsAt').value = meetup.startsAt ? meetup.startsAt.substring(0, 16) : ''
+		document.getElementById('awLocation').value = meetup.location || ''
+		document.getElementById('awAgenda').value = meetup.meetupAntiWorkshop?.agenda || ''
+		document.getElementById('antiWorkshopModalTitle').textContent = 'Edit Anti-Workshop'
+		new bootstrap.Modal(document.getElementById('antiWorkshopModal')).show()
+	}
+
+	async function saveWorkshop() {
+		const meetupId = document.getElementById('workshopMeetupId').value
+		const body = {
+			startsAt: new Date(document.getElementById('wsStartsAt').value).toISOString(),
+			location: document.getElementById('wsLocation').value,
+			title: document.getElementById('wsTitle').value,
+			theme: document.getElementById('wsTheme').value,
+			presenterId: document.getElementById('wsPresenter').value || undefined
+		}
+
+		try {
+			if (meetupId) {
+				await apiCall(`/api/meetups/workshop/${meetupId}`, 'PUT', body)
+				showToast('Workshop updated')
+			} else {
+				await apiCall('/api/meetups/workshop', 'POST', body)
+				showToast('Workshop created')
+			}
+			bootstrap.Modal.getInstance(document.getElementById('workshopModal')).hide()
+			setTimeout(() => reloadPage(), 500)
+		} catch (err) {
+			showToast(err.message || 'Failed to save workshop', 'error')
+		}
+	}
+
+	async function saveAntiWorkshop() {
+		const meetupId = document.getElementById('awMeetupId').value
+		const body = {
+			startsAt: new Date(document.getElementById('awStartsAt').value).toISOString(),
+			location: document.getElementById('awLocation').value,
+			agenda: document.getElementById('awAgenda').value
+		}
+
+		try {
+			if (meetupId) {
+				await apiCall(`/api/meetups/anti-workshop/${meetupId}`, 'PUT', body)
+				showToast('Anti-Workshop updated')
+			} else {
+				await apiCall('/api/meetups/anti-workshop', 'POST', body)
+				showToast('Anti-Workshop created')
+			}
+			bootstrap.Modal.getInstance(document.getElementById('antiWorkshopModal')).hide()
+			setTimeout(() => reloadPage(), 500)
+		} catch (err) {
+			showToast(err.message || 'Failed to save anti-workshop', 'error')
+		}
+	}
+
+	function deleteMeetup(id) {
+		confirmDelete('this meetup', async () => {
+			await apiCall(`/api/meetups/${id}`, 'DELETE')
+			setTimeout(() => reloadPage(), 500)
+		})
+	}
+
+	// Format dates
+	document.querySelectorAll('td').forEach(td => {
+		if (td.textContent && td.textContent.match(/^\d{4}-\d{2}-\d{2}T/)) {
+			td.textContent = formatDate(td.textContent)
+		}
+	})
+</script>
+
+{{> foot}}

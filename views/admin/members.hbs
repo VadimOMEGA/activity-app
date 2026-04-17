@@ -1,0 +1,290 @@
+{{> head}}
+<div class="page-header">
+	<h1>Members</h1>
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Email</th>
+				<th>Type</th>
+				<th>Kind</th>
+				<th>Joined At</th>
+				{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}
+			</tr>
+		</thead>
+		<tbody>
+			{{#each members}}
+			<tr>
+				<td>{{this.profile.name}}</td>
+				<td>{{this.profile.email}}</td>
+				<td>
+					{{#if this.aspiringMember}}
+					<span class="badge bg-warning text-dark">ASPIRING</span>
+					{{/if}}
+					{{#if this.fullMember}}
+					<span class="badge bg-success">FULL</span>
+					{{/if}}
+				</td>
+				<td>
+					{{#if this.fullMember}}
+					<span class="badge bg-info">{{this.fullMember.fullMemberKind}}</span>
+					{{else}}
+					<span class="text-secondary">—</span>
+					{{/if}}
+				</td>
+				<td>{{formatDate this.joinedAt}}</td>
+				{{#if ../canEdit}}
+				<td class="text-end">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit Profile"
+						onclick='openProfileModal("{{this.profile.id}}", "{{this.profile.name}}", "{{this.profile.email}}", "{{this.profile.phone}}", "{{this.profile.birthDate}}")'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-teal btn-sm" title="Edit Member"
+						onclick='openMemberEditModal("{{this.id}}", {{#if this.aspiringMember}}true{{else}}false{{/if}}, "{{#if this.fullMember}}{{this.fullMember.fullMemberKind}}{{/if}}")'>
+						<i class="bi bi-person-gear"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+
+			<!-- Fees Accordion: only for FULL + REGULAR members -->
+			{{#if this.fullMember}}
+			{{#if (eq this.fullMember.fullMemberKind "REGULAR")}}
+			<tr>
+				<td colspan="{{#if ../canEdit}}6{{else}}5{{/if}}" class="p-0">
+					<div class="accordion accordion-flush" id="fees-accordion-{{this.id}}">
+						<div class="accordion-item">
+							<h2 class="accordion-header">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+									data-bs-target="#fees-body-{{this.id}}">
+									<i class="bi bi-cash-stack me-2"></i> Membership Fees ({{this.membershipFees.length}})
+								</button>
+							</h2>
+							<div id="fees-body-{{this.id}}" class="accordion-collapse collapse">
+								<div class="accordion-body">
+									{{#if ../canEdit}}
+									<div class="mb-2 text-end">
+										<button class="btn btn-teal btn-sm" onclick='openFeeModal("{{this.id}}")'>
+											<i class="bi bi-plus-lg me-1"></i>Add Fee
+										</button>
+									</div>
+									{{/if}}
+
+									{{#if this.membershipFees.length}}
+									<table class="table table-dark table-sm table-hover mb-0">
+										<thead>
+											<tr>
+												<th>Year</th>
+												<th>Amount</th>
+												<th>Status</th>
+												{{#if ../../canEdit}}<th class="text-end">Actions</th>{{/if}}
+											</tr>
+										</thead>
+										<tbody>
+											{{#each this.membershipFees}}
+											<tr>
+												<td>{{this.year}}</td>
+												<td>{{this.amount}} RON</td>
+												<td>
+													{{#if (eq this.status "PAID")}}
+													<span class="badge badge-paid">PAID</span>
+													{{else}}
+													<span class="badge badge-unpaid">UNPAID</span>
+													{{/if}}
+												</td>
+												{{#if ../../../canEdit}}
+												<td class="text-end">
+													<button class="btn btn-outline-light btn-sm me-1" title="Edit Fee"
+														onclick='openFeeModal("{{../id}}", "{{this.id}}", {{this.year}}, {{this.amount}}, "{{this.status}}")'>
+														<i class="bi bi-pencil"></i>
+													</button>
+													<button class="btn btn-outline-danger btn-sm" title="Delete Fee"
+														onclick='deleteFee("{{this.id}}", "Fee {{this.year}}")'>
+														<i class="bi bi-trash"></i>
+													</button>
+												</td>
+												{{/if}}
+											</tr>
+											{{/each}}
+										</tbody>
+									</table>
+									{{else}}
+									<p class="text-secondary mb-0 small">No fees recorded</p>
+									{{/if}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			{{/if}}
+			{{/if}}
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless members.length}}
+<div class="text-center text-secondary py-5">
+	<i class="bi bi-person-badge display-4"></i>
+	<p class="mt-2">No members found</p>
+</div>
+{{/unless}}
+
+<!-- Edit Member Modal -->
+<div class="modal fade" id="memberEditModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Edit Member</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="memberEditId">
+				<div class="mb-3">
+					<label for="memberType" class="form-label">Member Type</label>
+					<select class="form-select" id="memberType" onchange="toggleFullMemberKind()">
+						<option value="ASPIRING">Aspiring</option>
+						<option value="FULL">Full</option>
+					</select>
+				</div>
+				<div class="mb-3" id="fullMemberKindGroup" style="display: none;">
+					<label for="fullMemberKind" class="form-label">Full Member Kind</label>
+					<select class="form-select" id="fullMemberKind">
+						<option value="REGULAR">Regular</option>
+						<option value="FOUNDER">Founder</option>
+						<option value="HONORARY">Honorary</option>
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-teal btn-sm" onclick="saveMember()">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Add/Edit Fee Modal -->
+<div class="modal fade" id="feeModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="feeModalTitle">Add Fee</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="feeMemberId">
+				<input type="hidden" id="feeId">
+				<div class="mb-3">
+					<label for="feeYear" class="form-label">Year</label>
+					<input type="number" class="form-control" id="feeYear" min="2000" max="2100">
+				</div>
+				<div class="mb-3">
+					<label for="feeAmount" class="form-label">Amount (RON)</label>
+					<input type="number" class="form-control" id="feeAmount" min="0" step="0.01">
+				</div>
+				<div class="mb-3">
+					<label for="feeStatus" class="form-label">Status</label>
+					<select class="form-select" id="feeStatus">
+						<option value="UNPAID">Unpaid</option>
+						<option value="PAID">Paid</option>
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-teal btn-sm" onclick="saveFee()">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	// Format dates
+	document.querySelectorAll('td').forEach(td => {
+		if (td.textContent && td.textContent.match(/^\d{4}-\d{2}-\d{2}T/)) {
+			td.textContent = formatDate(td.textContent)
+		}
+	})
+
+	// Member edit
+	function openMemberEditModal(memberId, isAspiring, fullMemberKind) {
+		document.getElementById('memberEditId').value = memberId
+		document.getElementById('memberType').value = isAspiring ? 'ASPIRING' : 'FULL'
+		document.getElementById('fullMemberKind').value = fullMemberKind || 'REGULAR'
+		toggleFullMemberKind()
+		new bootstrap.Modal(document.getElementById('memberEditModal')).show()
+	}
+
+	function toggleFullMemberKind() {
+		const type = document.getElementById('memberType').value
+		document.getElementById('fullMemberKindGroup').style.display = type === 'FULL' ? 'block' : 'none'
+	}
+
+	async function saveMember() {
+		const id = document.getElementById('memberEditId').value
+		const memberType = document.getElementById('memberType').value
+		const fullMemberKind = document.getElementById('fullMemberKind').value
+
+		const body = { memberType }
+		if (memberType === 'FULL') body.fullMemberKind = fullMemberKind
+
+		try {
+			await apiCall(`/api/members/${id}`, 'PUT', body)
+			showToast('Member updated successfully')
+			bootstrap.Modal.getInstance(document.getElementById('memberEditModal')).hide()
+			setTimeout(() => reloadPage(), 500)
+		} catch (err) {
+			showToast(err.message || 'Failed to update member', 'error')
+		}
+	}
+
+	// Fee CRUD
+	function openFeeModal(memberId, feeId, year, amount, status) {
+		document.getElementById('feeMemberId').value = memberId
+		document.getElementById('feeId').value = feeId || ''
+		document.getElementById('feeYear').value = year || new Date().getFullYear()
+		document.getElementById('feeAmount').value = amount || ''
+		document.getElementById('feeStatus').value = status || 'UNPAID'
+		document.getElementById('feeModalTitle').textContent = feeId ? 'Edit Fee' : 'Add Fee'
+		new bootstrap.Modal(document.getElementById('feeModal')).show()
+	}
+
+	async function saveFee() {
+		const memberId = document.getElementById('feeMemberId').value
+		const feeId = document.getElementById('feeId').value
+		const body = {
+			memberId,
+			year: parseInt(document.getElementById('feeYear').value),
+			amount: parseFloat(document.getElementById('feeAmount').value),
+			status: document.getElementById('feeStatus').value
+		}
+
+		try {
+			if (feeId) {
+				await apiCall(`/api/membership-fees/${feeId}`, 'PUT', body)
+				showToast('Fee updated successfully')
+			} else {
+				await apiCall('/api/membership-fees', 'POST', body)
+				showToast('Fee created successfully')
+			}
+			bootstrap.Modal.getInstance(document.getElementById('feeModal')).hide()
+			setTimeout(() => reloadPage(), 500)
+		} catch (err) {
+			showToast(err.message || 'Failed to save fee', 'error')
+		}
+	}
+
+	function deleteFee(feeId, feeName) {
+		confirmDelete(feeName, async () => {
+			await apiCall(`/api/membership-fees/${feeId}`, 'DELETE')
+			setTimeout(() => reloadPage(), 500)
+		})
+	}
+</script>
+
+{{> foot}}

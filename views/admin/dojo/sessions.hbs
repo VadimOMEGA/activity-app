@@ -1,0 +1,77 @@
+{{> head}}
+<div class="page-header">
+	<h1>CoderDojo — Sessions</h1>
+	{{#if canEditSessions}}
+	<button class="btn btn-teal btn-sm" onclick="openSessionModal()">
+		<i class="bi bi-plus-lg me-1"></i>New Session
+	</button>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Date</th>
+				<th>Location</th>
+				<th>Theme</th>
+				<th>Mentor</th>
+				{{#if canEditSessions}}<th class="text-end">Actions</th>{{/if}}
+			</tr>
+		</thead>
+		<tbody>
+			{{#each sessions}}
+			<tr>
+				<td>{{formatDate this.startsAt}}</td>
+				<td>{{this.location}}</td>
+				<td>{{this.theme}}</td>
+				<td>{{#if this.mentor}}{{this.mentor.profile.name}}{{else}}<span class="text-secondary">—</span>{{/if}}</td>
+				{{#if ../canEditSessions}}
+				<td class="text-end">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit" onclick='openEditSession({{{json this}}})'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-danger btn-sm" title="Delete" onclick='deleteSession("{{this.id}}")'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless sessions.length}}
+<div class="text-center text-secondary py-5"><i class="bi bi-journal-code display-4"></i><p class="mt-2">No sessions</p></div>
+{{/unless}}
+
+<!-- Session Modal -->
+<div class="modal fade" id="sessionModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="sessionTitle">New Session</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="sessionId">
+			<div class="mb-3"><label class="form-label">Date & Time</label><input type="datetime-local" class="form-control" id="sessionStartsAt"></div>
+			<div class="mb-3"><label class="form-label">Location</label><input type="text" class="form-control" id="sessionLocation"></div>
+			<div class="mb-3"><label class="form-label">Theme</label><input type="text" class="form-control" id="sessionTheme"></div>
+			<div class="mb-3"><label class="form-label">Mentor</label>
+				<select class="form-select" id="sessionMentorId">
+					<option value="">— No mentor —</option>
+					{{#each mentors}}<option value="{{this.id}}">{{this.profile.name}}</option>{{/each}}
+				</select>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveSession()">Save</button></div>
+	</div></div>
+</div>
+
+<script>
+function openSessionModal(){document.getElementById('sessionId').value='';document.getElementById('sessionStartsAt').value='';document.getElementById('sessionLocation').value='';document.getElementById('sessionTheme').value='';document.getElementById('sessionMentorId').value='';document.getElementById('sessionTitle').textContent='New Session';new bootstrap.Modal(document.getElementById('sessionModal')).show()}
+function openEditSession(s){document.getElementById('sessionId').value=s.id;document.getElementById('sessionStartsAt').value=s.startsAt?s.startsAt.substring(0,16):'';document.getElementById('sessionLocation').value=s.location||'';document.getElementById('sessionTheme').value=s.theme||'';document.getElementById('sessionMentorId').value=s.mentorId||'';document.getElementById('sessionTitle').textContent='Edit Session';new bootstrap.Modal(document.getElementById('sessionModal')).show()}
+async function saveSession(){const id=document.getElementById('sessionId').value;const body={startsAt:new Date(document.getElementById('sessionStartsAt').value).toISOString(),location:document.getElementById('sessionLocation').value,theme:document.getElementById('sessionTheme').value,mentorId:document.getElementById('sessionMentorId').value||undefined};try{if(id){await apiCall(`/api/dojo-sessions/${id}`,'PUT',body);showToast('Updated')}else{await apiCall('/api/dojo-sessions','POST',body);showToast('Created')}bootstrap.Modal.getInstance(document.getElementById('sessionModal')).hide();setTimeout(()=>reloadPage(),500)}catch(e){showToast(e.message,'error')}}
+function deleteSession(id){confirmDelete('this session',async()=>{await apiCall(`/api/dojo-sessions/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})}
+document.querySelectorAll('td').forEach(td=>{if(td.textContent&&td.textContent.match(/^\d{4}-\d{2}-\d{2}T/))td.textContent=formatDate(td.textContent)})
+</script>
+
+{{> foot}}

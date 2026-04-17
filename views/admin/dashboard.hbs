@@ -1,0 +1,73 @@
+{{> head}}
+<div class="page-header">
+	<h1>Dashboard</h1>
+</div>
+
+<div class="bento-grid">
+	<a href="/admin/users" class="bento-card">
+		<div class="card-icon"><i class="bi bi-people-fill"></i></div>
+		<div class="card-count">{{counts.users}}</div>
+		<div class="card-label">Users</div>
+	</a>
+
+	<a href="/admin/members" class="bento-card">
+		<div class="card-icon"><i class="bi bi-person-badge-fill"></i></div>
+		<div class="card-count">{{counts.members}}</div>
+		<div class="card-label">Members</div>
+	</a>
+
+	<a href="/admin/coderdojo/mentors" class="bento-card">
+		<div class="card-icon"><i class="bi bi-star-fill"></i></div>
+		<div class="card-count">{{counts.mentors}}</div>
+		<div class="card-label">Mentors</div>
+	</a>
+
+	<a href="/admin/coderdojo/tutors" class="bento-card">
+		<div class="card-icon"><i class="bi bi-person-workspace"></i></div>
+		<div class="card-count">{{counts.tutors}}</div>
+		<div class="card-label">Tutors</div>
+	</a>
+
+	<a href="/admin/coderdojo/tutors" class="bento-card">
+		<div class="card-icon"><i class="bi bi-ninja"></i></div>
+		<div class="card-count">{{counts.ninjas}}</div>
+		<div class="card-label">Ninjas</div>
+	</a>
+
+	<a href="/admin/meetups" class="bento-card">
+		<div class="card-icon"><i class="bi bi-calendar-event-fill"></i></div>
+		<div class="card-count">{{counts.meetups}}</div>
+		<div class="card-label">Meetups</div>
+	</a>
+
+	<a href="/admin/coderdojo/sessions" class="bento-card">
+		<div class="card-icon"><i class="bi bi-journal-code"></i></div>
+		<div class="card-count">{{counts.sessions}}</div>
+		<div class="card-label">Dojo Sessions</div>
+	</a>
+
+	<a href="/admin/general-assemblies" class="bento-card">
+		<div class="card-icon"><i class="bi bi-bank2"></i></div>
+		<div class="card-count">{{counts.assemblies}}</div>
+		<div class="card-label">Assemblies</div>
+	</a>
+
+	<a href="/admin/agreements" class="bento-card">
+		<div class="card-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+		<div class="card-count">{{counts.documents}}</div>
+		<div class="card-label">Documents</div>
+	</a>
+
+	<div class="bento-card" style="cursor: default;">
+		<div class="card-icon"><i class="bi bi-cash-stack"></i></div>
+		<div class="card-count">{{counts.fees}}</div>
+		<div class="card-label">Membership Fees</div>
+	</div>
+
+	<div class="bento-card" style="cursor: default;">
+		<div class="card-icon"><i class="bi bi-shield-lock-fill"></i></div>
+		<div class="card-count">{{counts.roles}}</div>
+		<div class="card-label">Roles</div>
+	</div>
+</div>
+{{> foot}}

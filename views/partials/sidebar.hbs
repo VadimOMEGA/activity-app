@@ -1,0 +1,69 @@
+<nav class="admin-sidebar" id="adminSidebar">
+	<div class="sidebar-brand">
+		<a href="/admin" class="brand-text text-decoration-none">AI3</a>
+	</div>
+	<div class="sidebar-nav">
+		<ul class="nav flex-column">
+			<li class="nav-item">
+				<a class="nav-link {{#if (eq activePage 'dashboard')}}active{{/if}}" href="/admin">
+					<i class="bi bi-grid-1x2-fill"></i> Dashboard
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link {{#if (eq activePage 'users')}}active{{/if}}" href="/admin/users">
+					<i class="bi bi-people-fill"></i> Users
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link {{#if (eq activePage 'members')}}active{{/if}}" href="/admin/members">
+					<i class="bi bi-person-badge-fill"></i> Members
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link {{#if (eq activePage 'meetups')}}active{{/if}}" href="/admin/meetups">
+					<i class="bi bi-calendar-event-fill"></i> Meetups
+				</a>
+			</li>
+
+			<!-- CoderDojo Dropdown -->
+			<li class="nav-item">
+				<a class="nav-link sidebar-dropdown-btn {{#if (eq activePage 'mentors')}}active{{/if}}{{#if (eq activePage 'tutors')}}active{{/if}}{{#if (eq activePage 'sessions')}}active{{/if}}"
+					data-bs-toggle="collapse" href="#coderDojoMenu" role="button"
+					aria-expanded="{{#if isCoderDojoOpen}}true{{else}}false{{/if}}" aria-controls="coderDojoMenu">
+					<i class="bi bi-mortarboard-fill"></i> CoderDojo
+					<i class="bi bi-chevron-down dropdown-arrow"></i>
+				</a>
+				<div class="collapse sidebar-submenu {{#if isCoderDojoOpen}}show{{/if}}" id="coderDojoMenu">
+					<ul class="nav flex-column">
+						<li class="nav-item">
+							<a class="nav-link {{#if (eq activePage 'mentors')}}active{{/if}}" href="/admin/coderdojo/mentors">
+								<i class="bi bi-star-fill"></i> Mentors
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link {{#if (eq activePage 'tutors')}}active{{/if}}" href="/admin/coderdojo/tutors">
+								<i class="bi bi-person-workspace"></i> Tutors
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link {{#if (eq activePage 'sessions')}}active{{/if}}" href="/admin/coderdojo/sessions">
+								<i class="bi bi-journal-code"></i> Sessions
+							</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+
+			<li class="nav-item">
+				<a class="nav-link {{#if (eq activePage 'agreements')}}active{{/if}}" href="/admin/agreements">
+					<i class="bi bi-file-earmark-text-fill"></i> Agreements
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link {{#if (eq activePage 'assemblies')}}active{{/if}}" href="/admin/general-assemblies">
+					<i class="bi bi-bank2"></i> General Assemblies
+				</a>
+			</li>
+		</ul>
+	</div>
+</nav>
