@@ -82,6 +82,9 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - src/dojo-tutors
    - src/dojo-ninjas
    - src/dojo-sessions
+   - src/agreement-documents
+   - src/mentor-agreement-signatures
+   - src/tutor-agreement-signatures
    - src/general-assemblies
    - src/festival
    - src/blog
