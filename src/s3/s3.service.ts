@@ -1,4 +1,5 @@
 import {
+	DeleteObjectCommand,
 	GetObjectCommand,
 	HeadObjectCommand,
 	NotFound,
@@ -14,10 +15,16 @@ import { lookup as mimeLookup } from 'mime-types'
 export class S3Service {
 	private readonly s3: S3Client
 	private readonly bucket: string
+	private readonly slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 	private readonly allowedMimeTypes = new Set([
 		'application/pdf',
 		'application/msword',
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+	])
+	private readonly mimeTypeToExtension = new Map<string, string>([
+		['application/pdf', 'pdf'],
+		['application/msword', 'doc'],
+		['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx']
 	])
 
 	constructor(private readonly config: ConfigService) {
@@ -53,8 +60,9 @@ export class S3Service {
 		return this.bucket
 	}
 
-	async createUploadUrl(originalFileName: string, providedContentType?: string) {
+	async createUploadUrl(slug: string, originalFileName: string, providedContentType?: string) {
 		const expiresIn = Number(this.config.get<string>('S3_PRESIGNED_EXPIRES_UPLOAD') ?? '300')
+		this.validateSlug(slug)
 
 		const detectedContentType = providedContentType ?? mimeLookup(originalFileName) ?? undefined
 		if (!detectedContentType || typeof detectedContentType !== 'string') {
@@ -65,8 +73,12 @@ export class S3Service {
 			throw new BadRequestException('Unsupported file type')
 		}
 
-		const fileName = this.sanitizeFileName(originalFileName)
-		const key = `agreement-documents/${new Date().getFullYear()}/${crypto.randomUUID()}-${fileName}`
+		const extension = this.mimeTypeToExtension.get(detectedContentType)
+		if (!extension) {
+			throw new BadRequestException('Unsupported file extension for content type')
+		}
+
+		const key = `agreement-documents/${slug}.${extension}`
 
 		const command = new PutObjectCommand({
 			Bucket: this.bucket,
@@ -123,7 +135,33 @@ export class S3Service {
 		}
 	}
 
-	private sanitizeFileName(fileName: string) {
-		return fileName.toLowerCase().replace(/[^a-z0-9._-]/g, '-')
+	async deleteObject(key: string) {
+		if (!key || key.trim().length === 0) {
+			throw new BadRequestException('File key is required')
+		}
+
+		await this.s3.send(
+			new DeleteObjectCommand({
+				Bucket: this.bucket,
+				Key: key
+			})
+		)
+
+		return {
+			deleted: true,
+			key
+		}
+	}
+
+	private validateSlug(slug: string) {
+		if (!slug || slug.trim().length === 0) {
+			throw new BadRequestException('Slug is required')
+		}
+
+		if (!this.slugRegex.test(slug)) {
+			throw new BadRequestException(
+				'Invalid slug format. Use lowercase letters, numbers and single hyphens only'
+			)
+		}
 	}
 }

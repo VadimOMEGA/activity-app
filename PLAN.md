@@ -260,6 +260,9 @@ DTO validări recomandate pe entități core:
   - location `IsString` `MinLength(2)` `MaxLength(255)`; 
   - theme `IsString` `MaxLength(255)`; 
   - mentorId `IsString`
+- AgreementDocument DTO:
+  - name `IsString`
+  - slug `IsString` `@Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)`
 - AgreementSignature DTO: 
   - mentorId/tutorId `IsString`; 
   - documentId `IsString`; 

@@ -13,6 +13,9 @@ import { DojoTutorsModule } from './dojo-tutors/dojo-tutors.module'
 import { DojoNinjasModule } from './dojo-ninjas/dojo-ninjas.module'
 import { DojoSessionsModule } from './dojo-sessions/dojo-sessions.module'
 import { S3Module } from './s3/s3.module';
+import { AgreementDocumentsModule } from './agreement-documents/agreement-documents.module';
+import { MentorAgreementSignaturesModule } from './mentor-agreement-signatures/mentor-agreement-signatures.module';
+import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tutor-agreement-signatures.module';
 
 @Module({
 	imports: [
@@ -29,7 +32,10 @@ import { S3Module } from './s3/s3.module';
 		DojoTutorsModule,
 		DojoNinjasModule,
 		DojoSessionsModule,
-		S3Module
+		S3Module,
+		AgreementDocumentsModule,
+		MentorAgreementSignaturesModule,
+		TutorAgreementSignaturesModule
 	]
 })
 export class AppModule {}
