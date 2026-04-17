@@ -267,10 +267,15 @@ DTO validări recomandate pe entități core:
   - mentorId/tutorId `IsString`; 
   - documentId `IsString`; 
   - signedAt `IsDateString`
-- GeneralAssembly DTO: year IsInt Min(2020) Max(2100); announcedAt IsOptional IsDateString; heldAt
-  IsOptional IsDateString; location IsOptional IsString MaxLength(255); minQuorum IsOptional IsInt
-  Min(1)
-- AssemblyAttendee DTO: assemblyId IsInt; memberId IsInt; attended IsBoolean
+- GeneralAssembly DTO: 
+  - year `IsInt` `Min(2020)` `Max(2100)`; 
+  - announcedAt `IsDateString`; 
+  - heldAt `IsDateString`; 
+  - location `IsString` `MaxLength(255)`; 
+  - minQuorum `IsInt` `Min(1)`
+- AssemblyAttendee DTO: 
+  - assemblyId `IsString`; 
+  - memberId `IsString`
 
 ## Faza 5: Modelare Prisma pentru Festival + Blog
 
