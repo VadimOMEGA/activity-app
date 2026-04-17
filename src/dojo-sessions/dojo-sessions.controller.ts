@@ -36,7 +36,7 @@ export class DojoSessionsController {
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
 	@Post()
-	@Auth('ADMIN')
+	@Auth('ADMIN', 'MENTOR')
 	create(@Body() dto: DojoSessionDto) {
 		return this.dojoSessionsService.create(dto)
 	}
@@ -44,14 +44,14 @@ export class DojoSessionsController {
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
 	@Put(':id')
-	@Auth('ADMIN')
+	@Auth('ADMIN', 'MENTOR')
 	update(@Param('id') id: string, @Body() dto: UpdateDojoSessionDto) {
 		return this.dojoSessionsService.update(id, dto)
 	}
 
 	@HttpCode(200)
 	@Delete(':id')
-	@Auth('ADMIN')
+	@Auth('ADMIN', 'MENTOR')
 	delete(@Param('id') id: string) {
 		return this.dojoSessionsService.delete(id)
 	}
