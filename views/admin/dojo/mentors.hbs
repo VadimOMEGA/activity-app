@@ -157,12 +157,12 @@
 		try {
 			const result = await apiCall('/api/mentor-agreement-signatures', 'POST', {
 				mentorId: currentMentorId,
-				documentId,
-				signedAt: new Date().toISOString()
+				documentId
 			})
 			currentSignatures.push(result)
 			renderSignatures()
 			showToast('Document signed')
+			setTimeout(() => reloadPage(), 500)
 		} catch (err) {
 			showToast(err.message || 'Failed to sign', 'error')
 			row.classList.remove('row-loader')
@@ -178,6 +178,7 @@
 			currentSignatures = currentSignatures.filter(s => s.id !== signatureId)
 			renderSignatures()
 			showToast('Signature removed')
+			setTimeout(() => reloadPage(), 500)
 		} catch (err) {
 			showToast(err.message || 'Failed to remove', 'error')
 			row.classList.remove('row-loader')

@@ -86,12 +86,7 @@ export class AgreementDocumentsService {
 				where: { id: document.id }
 			})
 
-			return {
-				uploaded: false,
-				documentId: document.id,
-				deleted: true,
-				message: 'No uploaded file found. The agreement document record has been deleted.'
-			}
+			throw new NotFoundException('No uploaded file found. The agreement document record has been deleted.')
 		}
 
 		return {

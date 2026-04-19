@@ -2,6 +2,7 @@ import { Controller, Get, Render, Req, Res, UseGuards } from '@nestjs/common'
 import type { Request, Response } from 'express'
 
 import { AdminAuthGuard } from './guards/admin-auth.guard'
+import { LoggedInGuard } from './guards/logged-in.guard'
 import { PrismaService } from 'src/prisma.service'
 
 @Controller('admin')
@@ -15,6 +16,12 @@ export class AdminController {
 		return {}
 	}
 
+	@Get('register')
+	@Render('admin/register')
+	registerPage() {
+		return {}
+	}
+
 	@Get('logout')
 	logout(@Res() res: Response) {
 		res.clearCookie('accessToken')
@@ -23,9 +30,16 @@ export class AdminController {
 
 	// ---- Dashboard ----
 	@Get()
-	@UseGuards(AdminAuthGuard)
-	@Render('admin/dashboard')
-	async dashboard(@Req() req: Request) {
+	@UseGuards(LoggedInGuard)
+	async dashboard(@Req() req: Request, @Res() res: Response) {
+		if (!(req as any).hasAdminAccess) {
+			return res.render('admin/waiting', {
+				pageTitle: 'Waiting for Role',
+				hideSidebar: true,
+				currentUser: (req as any).adminUser
+			})
+		}
+
 		const [
 			users,
 			members,
@@ -52,7 +66,7 @@ export class AdminController {
 			this.prisma.role.count()
 		])
 
-		return {
+		return res.render('admin/dashboard', {
 			pageTitle: 'Dashboard',
 			activePage: 'dashboard',
 			currentUser: (req as any).adminUser,
@@ -70,6 +84,6 @@ export class AdminController {
 				fees,
 				roles
 			}
-		}
+		})
 	}
 }

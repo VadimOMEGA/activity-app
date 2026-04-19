@@ -402,12 +402,12 @@ Each card: icon + count + entity name. Clickable → navigates to that page.
 
 **Actions per row** (ADMIN only):
 - ✏️ Edit Profile → **Profile Edit Modal**
-- ➕ Add Ninja → **Modal** (select profile, usefulInfo)
+- ➕ Add Ninja → **Modal** (create profile fields, usefulInfo)
 - 📝 Manage Signatures → **Signatures Modal** (same pattern as Mentors)
 - 🗑️ Delete Tutor → **Confirm modal**
 
 **Create** (ADMIN only):
-- ➕ New Tutor → **Modal** (select profileId)
+- ➕ New Tutor → **Modal** (create profile fields)
 
 **Ninjas accordion** (inside each tutor row):
 - Expand → shows ninjas sub-table

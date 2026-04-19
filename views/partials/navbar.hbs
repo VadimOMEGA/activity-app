@@ -1,8 +1,14 @@
-<header class="admin-navbar">
+<header class="admin-navbar {{#if hideSidebar}}no-sidebar{{/if}}">
+	{{#if hideSidebar}}
+	<div class="navbar-brand me-auto">
+		<a href="/admin" class="brand-text text-decoration-none text-white" style="font-size: 1.5rem; font-weight: 800; letter-spacing: 1px;">AI3</a>
+	</div>
+	{{else}}
 	<!-- Mobile sidebar toggle -->
 	<button class="sidebar-toggle" aria-label="Toggle sidebar">
 		<i class="bi bi-list"></i>
 	</button>
+	{{/if}}
 
 	<div class="navbar-user">
 		<!-- Profile name — click to edit profile -->

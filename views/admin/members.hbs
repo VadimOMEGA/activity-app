@@ -80,7 +80,7 @@
 												<th>Year</th>
 												<th>Amount</th>
 												<th>Status</th>
-												{{#if ../../canEdit}}<th class="text-end">Actions</th>{{/if}}
+												{{#if ../canEdit}}<th class="text-end">Actions</th>{{/if}}
 											</tr>
 										</thead>
 										<tbody>
@@ -95,7 +95,7 @@
 													<span class="badge badge-unpaid">UNPAID</span>
 													{{/if}}
 												</td>
-												{{#if ../../../canEdit}}
+												{{#if ../../canEdit}}
 												<td class="text-end">
 													<button class="btn btn-outline-light btn-sm me-1" title="Edit Fee"
 														onclick='openFeeModal("{{../id}}", "{{this.id}}", {{this.year}}, {{this.amount}}, "{{this.status}}")'>

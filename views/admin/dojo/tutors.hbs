@@ -64,13 +64,13 @@
 									{{/if}}
 									{{#if this.dojoNinjas.length}}
 									<table class="table table-dark table-sm table-hover mb-0">
-										<thead><tr><th>Name</th><th>Info</th>{{#if ../../canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+										<thead><tr><th>Name</th><th>Info</th>{{#if ../canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
 										<tbody>
 											{{#each this.dojoNinjas}}
 											<tr>
 												<td>{{this.profile.name}}</td>
 												<td class="truncate">{{this.usefulInfo}}</td>
-												{{#if ../../../canEdit}}
+												{{#if ../../canEdit}}
 												<td class="text-end">
 													<button class="btn btn-outline-light btn-sm me-1" onclick='editNinja("{{this.id}}", "{{this.tutorId}}", `{{this.usefulInfo}}`)'><i class="bi bi-pencil"></i></button>
 													<button class="btn btn-outline-light btn-sm me-1" onclick='openProfileModal("{{this.profile.id}}", "{{this.profile.name}}", "{{this.profile.email}}", "{{this.profile.phone}}", "{{this.profile.birthDate}}")'><i class="bi bi-person"></i></button>
@@ -102,7 +102,24 @@
 	<div class="modal-dialog"><div class="modal-content">
 		<div class="modal-header"><h5 class="modal-title">New Tutor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
 		<div class="modal-body">
-			<select class="form-select" id="tutorProfileId"><option value="">— Select profile —</option>{{#each profiles}}{{#unless this.dojoTutor}}<option value="{{this.id}}">{{this.name}}</option>{{/unless}}{{/each}}</select>
+			<div class="mb-3">
+				<label class="form-label">Full Name</label>
+				<input type="text" class="form-control" id="tutorName" required>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Email</label>
+				<input type="email" class="form-control" id="tutorEmail" required>
+			</div>
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Phone</label>
+					<input type="text" class="form-control" id="tutorPhone" required>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Birth Date</label>
+					<input type="date" class="form-control" id="tutorBirthDate" required>
+				</div>
+			</div>
 		</div>
 		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="createTutor()">Create</button></div>
 	</div></div>
@@ -114,7 +131,26 @@
 		<div class="modal-header"><h5 class="modal-title" id="ninjaTitle">Add Ninja</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
 		<div class="modal-body">
 			<input type="hidden" id="ninjaId"><input type="hidden" id="ninjaTutorId">
-			<div class="mb-3" id="ninjaProfileGroup"><label class="form-label">Profile</label><select class="form-select" id="ninjaProfileId"><option value="">— Select —</option>{{#each profiles}}{{#unless this.dojoNinja}}<option value="{{this.id}}">{{this.name}}</option>{{/unless}}{{/each}}</select></div>
+			<div id="ninjaProfileFields">
+				<div class="mb-3">
+					<label class="form-label">Ninja Name</label>
+					<input type="text" class="form-control" id="ninjaName">
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Email</label>
+					<input type="email" class="form-control" id="ninjaEmail">
+				</div>
+				<div class="row">
+					<div class="col-md-6 mb-3">
+						<label class="form-label">Phone</label>
+						<input type="text" class="form-control" id="ninjaPhone">
+					</div>
+					<div class="col-md-6 mb-3">
+						<label class="form-label">Birth Date</label>
+						<input type="date" class="form-control" id="ninjaBirthDate">
+					</div>
+				</div>
+			</div>
 			<div class="mb-3"><label class="form-label">Useful Info</label><textarea class="form-control" id="ninjaInfo" rows="3"></textarea></div>
 		</div>
 		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveNinja()">Save</button></div>
@@ -133,19 +169,89 @@
 const docs = {{{json documents}}}
 let sigTutorId = null, sigList = []
 
-function openCreateTutorModal(){new bootstrap.Modal(document.getElementById('createTutorModal')).show()}
-async function createTutor(){const p=document.getElementById('tutorProfileId').value;if(!p)return showToast('Select profile','error');try{await apiCall('/api/dojo-tutors','POST',{profileId:p});showToast('Created');setTimeout(()=>reloadPage(),500)}catch(e){showToast(e.message,'error')}}
+function openCreateTutorModal(){
+	document.getElementById('tutorName').value = '';
+	document.getElementById('tutorEmail').value = '';
+	document.getElementById('tutorPhone').value = '';
+	document.getElementById('tutorBirthDate').value = '';
+	new bootstrap.Modal(document.getElementById('createTutorModal')).show()
+}
+async function createTutor(){
+	const name = document.getElementById('tutorName').value;
+	const email = document.getElementById('tutorEmail').value;
+	const phone = document.getElementById('tutorPhone').value;
+	const birthDate = document.getElementById('tutorBirthDate').value;
+	
+	if(!name || !email || !phone || !birthDate) return showToast('Fill all fields','error');
+	
+	try{
+		await apiCall('/api/dojo-tutors','POST',{ name, email, phone, birthDate: new Date(birthDate).toISOString() });
+		showToast('Created');
+		setTimeout(()=>reloadPage(),500)
+	}catch(e){
+		showToast(e.message,'error')
+	}
+}
 function deleteTutor(id,n){confirmDelete(n,async()=>{await apiCall(`/api/dojo-tutors/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})}
 
-function openNinjaModal(tid){document.getElementById('ninjaId').value='';document.getElementById('ninjaTutorId').value=tid;document.getElementById('ninjaProfileId').value='';document.getElementById('ninjaInfo').value='';document.getElementById('ninjaProfileGroup').style.display='block';document.getElementById('ninjaTitle').textContent='Add Ninja';new bootstrap.Modal(document.getElementById('ninjaModal')).show()}
-function editNinja(id,tid,info){document.getElementById('ninjaId').value=id;document.getElementById('ninjaTutorId').value=tid;document.getElementById('ninjaInfo').value=info||'';document.getElementById('ninjaProfileGroup').style.display='none';document.getElementById('ninjaTitle').textContent='Edit Ninja';new bootstrap.Modal(document.getElementById('ninjaModal')).show()}
-async function saveNinja(){const id=document.getElementById('ninjaId').value,tid=document.getElementById('ninjaTutorId').value,info=document.getElementById('ninjaInfo').value;try{if(id){await apiCall(`/api/dojo-ninjas/${id}`,'PUT',{tutorId:tid,usefulInfo:info});showToast('Updated')}else{const pid=document.getElementById('ninjaProfileId').value;if(!pid)return showToast('Select profile','error');await apiCall('/api/dojo-ninjas','POST',{profileId:pid,tutorId:tid,usefulInfo:info});showToast('Created')}bootstrap.Modal.getInstance(document.getElementById('ninjaModal')).hide();setTimeout(()=>reloadPage(),500)}catch(e){showToast(e.message,'error')}}
+function openNinjaModal(tid){
+	document.getElementById('ninjaId').value='';
+	document.getElementById('ninjaTutorId').value=tid;
+	document.getElementById('ninjaName').value='';
+	document.getElementById('ninjaEmail').value='';
+	document.getElementById('ninjaPhone').value='';
+	document.getElementById('ninjaBirthDate').value='';
+	document.getElementById('ninjaInfo').value='';
+	document.getElementById('ninjaProfileFields').style.display='block';
+	document.getElementById('ninjaTitle').textContent='Add Ninja';
+	new bootstrap.Modal(document.getElementById('ninjaModal')).show()
+}
+function editNinja(id,tid,info){
+	document.getElementById('ninjaId').value=id;
+	document.getElementById('ninjaTutorId').value=tid;
+	document.getElementById('ninjaInfo').value=info||'';
+	document.getElementById('ninjaProfileFields').style.display='none';
+	document.getElementById('ninjaTitle').textContent='Edit Ninja';
+	new bootstrap.Modal(document.getElementById('ninjaModal')).show()
+}
+async function saveNinja(){
+	const id=document.getElementById('ninjaId').value,
+		  tid=document.getElementById('ninjaTutorId').value,
+		  info=document.getElementById('ninjaInfo').value;
+	try{
+		if(id){
+			await apiCall(`/api/dojo-ninjas/${id}`,'PUT',{tutorId:tid,usefulInfo:info});
+			showToast('Updated')
+		}else{
+			const name = document.getElementById('ninjaName').value;
+			const email = document.getElementById('ninjaEmail').value;
+			const phone = document.getElementById('ninjaPhone').value;
+			const birthDate = document.getElementById('ninjaBirthDate').value;
+			
+			if(!name || !email || !phone || !birthDate) return showToast('Fill all fields','error');
+			
+			await apiCall('/api/dojo-ninjas','POST',{
+				tutorId: tid,
+				usefulInfo: info,
+				name,
+				email,
+				phone,
+				birthDate: new Date(birthDate).toISOString()
+			});
+			showToast('Created')
+		}
+		bootstrap.Modal.getInstance(document.getElementById('ninjaModal')).hide();
+		setTimeout(()=>reloadPage(),500)
+	}catch(e){
+		showToast(e.message,'error')
+	}
+}
 function delNinja(id,n){confirmDelete(n,async()=>{await apiCall(`/api/dojo-ninjas/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})}
 
 function openTutorSigModal(tid,sigs){sigTutorId=tid;sigList=sigs||[];renderSigs();new bootstrap.Modal(document.getElementById('tutorSigModal')).show()}
 function renderSigs(){const b=document.getElementById('tutorSigBody');let h='<table class="table table-dark table-sm mb-0"><thead><tr><th>Document</th><th class="text-end">Status</th></tr></thead><tbody>';docs.forEach(d=>{const s=sigList.find(x=>x.documentId===d.id);h+=`<tr id="ts-${d.id}"><td>${escapeHtml(d.name)}</td><td class="text-end">`;if(s){h+=`<span class="text-success me-2"><i class="bi bi-check-circle-fill"></i> Signed ${formatDate(s.signedAt)}</span><button class="btn btn-outline-danger btn-sm" onclick="rmSig('${s.id}','${d.id}')"><i class="bi bi-x-lg"></i></button>`}else{h+=`<button class="btn btn-teal btn-sm" onclick="addSig('${d.id}')"><i class="bi bi-pen me-1"></i>Sign</button>`}h+='</td></tr>'});h+='</tbody></table>';b.innerHTML=h}
-async function addSig(did){document.getElementById('ts-'+did).classList.add('row-loader');try{const r=await apiCall('/api/tutor-agreement-signatures','POST',{tutorId:sigTutorId,documentId:did,signedAt:new Date().toISOString()});sigList.push(r);renderSigs();showToast('Signed')}catch(e){showToast(e.message,'error');document.getElementById('ts-'+did).classList.remove('row-loader')}}
-async function rmSig(sid,did){document.getElementById('ts-'+did).classList.add('row-loader');try{await apiCall(`/api/tutor-agreement-signatures/${sid}`,'DELETE');sigList=sigList.filter(s=>s.id!==sid);renderSigs();showToast('Removed')}catch(e){showToast(e.message,'error');document.getElementById('ts-'+did).classList.remove('row-loader')}}
+async function addSig(did){document.getElementById('ts-'+did).classList.add('row-loader');try{const r=await apiCall('/api/tutor-agreement-signatures','POST',{tutorId:sigTutorId,documentId:did});sigList.push(r);renderSigs();showToast('Signed');setTimeout(() => reloadPage(), 500)}catch(e){showToast(e.message,'error');document.getElementById('ts-'+did).classList.remove('row-loader');}}
+async function rmSig(sid,did){document.getElementById('ts-'+did).classList.add('row-loader');try{await apiCall(`/api/tutor-agreement-signatures/${sid}`,'DELETE');sigList=sigList.filter(s=>s.id!==sid);renderSigs();showToast('Removed');setTimeout(() => reloadPage(), 500)}catch(e){showToast(e.message,'error');document.getElementById('ts-'+did).classList.remove('row-loader');}}
 </script>
 
 {{> foot}}

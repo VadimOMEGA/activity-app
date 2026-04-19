@@ -14,7 +14,9 @@
 </head>
 
 <body>
+	{{#unless hideSidebar}}
 	<div class="sidebar-backdrop"></div>
 	{{> sidebar}}
-	{{> navbar}}
-	<main class="admin-main">
+	{{/unless}}
+	{{> navbar hideSidebar=hideSidebar}}
+	<main class="admin-main {{#if hideSidebar}}no-sidebar{{/if}}">

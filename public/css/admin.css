@@ -141,6 +141,10 @@ a:hover {
 	transition: left 0.3s ease;
 }
 
+.admin-navbar.no-sidebar {
+	left: 0;
+}
+
 .admin-navbar .navbar-user {
 	display: flex;
 	align-items: center;
@@ -201,6 +205,10 @@ a:hover {
 	margin-top: var(--ai3-navbar-height);
 	padding: 1.5rem;
 	min-height: calc(100vh - var(--ai3-navbar-height));
+}
+
+.admin-main.no-sidebar {
+	margin-left: 0;
 }
 
 /* ---- Page Header ---- */

@@ -79,9 +79,9 @@ async function createDocument(){
 	showModalLoader(modal,'Uploading...')
 	try{
 		// Step 1: create with upload intent
-		const intent=await apiCall('/api/agreement-documents/create-with-upload-intent','POST',{name,slug,fileName:file.name,contentType:file.type})
+		const intent=await apiCall('/api/agreement-documents/create-with-upload-intent','POST',{name,slug,originalFileName:file.name,contentType:file.type})
 		// Step 2: upload file to presigned URL
-		await fetch(intent.presignedUploadUrl,{method:'PUT',body:file,headers:{'Content-Type':file.type}})
+		await fetch(intent.upload.uploadUrl,{method:'PUT',body:file,headers:{'Content-Type':file.type}})
 		// Step 3: confirm upload
 		updateLoaderText(modal,'Confirming upload...')
 		await apiCall(`/api/agreement-documents/${intent.document.id}/confirm-upload`,'POST')
@@ -98,7 +98,7 @@ async function createDocument(){
 function openEditDocModal(id,name){document.getElementById('editDocId').value=id;document.getElementById('editDocName').value=name;new bootstrap.Modal(document.getElementById('editDocModal')).show()}
 async function saveDocName(){const id=document.getElementById('editDocId').value;try{await apiCall(`/api/agreement-documents/${id}`,'PUT',{name:document.getElementById('editDocName').value});showToast('Updated');bootstrap.Modal.getInstance(document.getElementById('editDocModal')).hide();setTimeout(()=>reloadPage(),500)}catch(e){showToast(e.message,'error')}}
 
-async function downloadDoc(slug){try{const data=await apiCall(`/api/agreement-documents/slug/${slug}`);if(data.downloadUrl)window.open(data.downloadUrl,'_blank');else showToast('No download URL','error')}catch(e){showToast(e.message,'error')}}
+async function downloadDoc(slug){try{const data=await apiCall(`/api/agreement-documents/slug/${slug}`);if(data.file.downloadUrl)window.open(data.file.downloadUrl,'_blank');else showToast('No download URL','error')}catch(e){showToast(e.message,'error')}}
 
 function deleteDoc(id,name){confirmDelete(name,async()=>{await apiCall(`/api/agreement-documents/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})}
 </script>

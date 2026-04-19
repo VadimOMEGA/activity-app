@@ -36,7 +36,12 @@ export class DojoTutorsService {
 		return this.prisma.dojoTutor.create({
 			data: {
 				profile: {
-					create: dto
+					create: {
+						name: dto.name,
+						email: dto.email,
+						phone: dto.phone,
+						birthDate: new Date(dto.birthDate)
+					}
 				}
 			},
 			include: { profile: true, dojoNinjas: true }

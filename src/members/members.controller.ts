@@ -34,7 +34,7 @@ export class MembersController {
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
-	@Put()
+	@Put(':id')
 	@Auth('ADMIN')
 	update(@Param('id') id: string, @Body() dto: UpdateMemberDto) {
 		return this.membersService.update(id, dto)
