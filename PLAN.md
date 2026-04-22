@@ -360,23 +360,23 @@ DTO validări cheie blog:
 - Post DTO: 
   - title `IsString` `MinLength(2)` `MaxLength(255)`; 
   - slug `IsString` `MinLength(2)` `MaxLength(255)`; 
-  - summary `IsOptional` `IsString` `MaxLength(500)`; 
-  - body `IsString` `MinLength(2)`
+  - summary `IsString` `MaxLength(500)`; 
+  - body `IsJson`
 
 DTO validări cheie festival:
 
 - Edition DTO: 
   - year `IsInt` `Min(2020)` `Max(2100)`; 
   - title/theme `IsString` `MaxLength(255)`; 
-  - culori `Matches regex hex`; 
-  - file fields `IsOptional` `IsString` `MaxLength(255)`
+  - culori `IsHexColor`; 
+  - file fields `IsString` `MaxLength(255)`
 - Section DTO: 
   - editionId `IsString`; 
   - name `IsString` `MinLength(2)` `MaxLength(120)`
 - Activity DTO: 
   - sectionId `IsString`; 
   - title `IsString` `MaxLength(200)`; 
-  - description `IsOptional` `IsString` `MaxLength(5000)`; 
+  - description `IsString` `MaxLength(5000)`; 
   - activityType `IsEnum(FestivalActivityType)`; 
   - audience `IsEnum(ActivityAudienceType)`
 - Volunteer DTO: 
@@ -385,20 +385,20 @@ DTO validări cheie festival:
 - Location DTO: 
   - editionId `IsString`; 
   - name `IsString` `MaxLength(200)`; 
-  - address `IsOptional` `IsString` `MaxLength(255)`; 
-  - coordinatorId `IsOptional` `IsString`
+  - address `IsString` `MaxLength(255)`; 
+  - coordinatorId `IsString`
 - Guest DTO: 
   - editionId `IsString`; 
-  profileId `IsString`
+  - profileId `IsString`
 - GuestRole DTO: 
   - guestId `IsString`; 
-  - role `IsIn speaker|workshop_org|artist|other`
+  - roles `IsEnum(GuestRole)[]`
 - Program DTO: 
   - editionId `IsString`; 
   - locationId `IsString`; 
   - activityId `IsString`; 
   - startsAt `IsDateString`; 
-  - endsAt `IsOptional` `IsDateString`
+  - endsAt `IsDateString`
 - Sponsor DTO: 
   - editionId `IsString`; 
   - name `IsString` `MaxLength(200)`; 
@@ -416,7 +416,10 @@ DTO validări cheie festival:
   - holderProfileId `IsString`; 
   - code `IsString` `MinLength(6)` `MaxLength(64)`;
   - guestCount `IsInt` `Min(0)` `Max(5)`
-- Redeeming DTO: ticketId IsInt; discountLocationId IsInt; redeemedAt IsDateString
+- Redeeming DTO: 
+  - ticketId `IsString`; 
+  - discountLocationId `IsString`; 
+  - redeemedAt `IsDateString`
 
 ## Faza 8: Verificare, seed, testare și hardening
 
