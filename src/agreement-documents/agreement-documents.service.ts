@@ -55,6 +55,7 @@ export class AgreementDocumentsService {
 
 		try {
 			const upload = await this.s3Service.createUploadUrl(
+				'agreement-documents',
 				dto.slug,
 				dto.originalFileName,
 				dto.contentType
@@ -86,7 +87,9 @@ export class AgreementDocumentsService {
 				where: { id: document.id }
 			})
 
-			throw new NotFoundException('No uploaded file found. The agreement document record has been deleted.')
+			throw new NotFoundException(
+				'No uploaded file found. The agreement document record has been deleted.'
+			)
 		}
 
 		return {

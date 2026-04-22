@@ -19,12 +19,18 @@ export class S3Service {
 	private readonly allowedMimeTypes = new Set([
 		'application/pdf',
 		'application/msword',
-		'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+		'image/jpeg',
+		'image/png',
+		'image/webp'
 	])
 	private readonly mimeTypeToExtension = new Map<string, string>([
 		['application/pdf', 'pdf'],
 		['application/msword', 'doc'],
-		['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx']
+		['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx'],
+		['image/jpeg', 'jpg'],
+		['image/png', 'png'],
+		['image/webp', 'webp']
 	])
 
 	constructor(private readonly config: ConfigService) {
@@ -60,9 +66,13 @@ export class S3Service {
 		return this.bucket
 	}
 
-	async createUploadUrl(slug: string, originalFileName: string, providedContentType?: string) {
+	async createUploadUrl(
+		folder: string,
+		fileName: string,
+		originalFileName: string,
+		providedContentType?: string
+	) {
 		const expiresIn = Number(this.config.get<string>('S3_PRESIGNED_EXPIRES_UPLOAD') ?? '300')
-		this.validateSlug(slug)
 
 		const detectedContentType = providedContentType ?? mimeLookup(originalFileName) ?? undefined
 		if (!detectedContentType || typeof detectedContentType !== 'string') {
@@ -78,7 +88,7 @@ export class S3Service {
 			throw new BadRequestException('Unsupported file extension for content type')
 		}
 
-		const key = `agreement-documents/${slug}.${extension}`
+		const key = `${folder}/${fileName}.${extension}`
 
 		const command = new PutObjectCommand({
 			Bucket: this.bucket,
@@ -87,9 +97,11 @@ export class S3Service {
 		})
 
 		const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn })
+		const publicUrl = `${this.config.get<string>('S3_ENDPOINT')}/${this.bucket}/${key}`
 
 		return {
 			uploadUrl,
+			publicUrl,
 			key,
 			contentType: detectedContentType,
 			expiresIn

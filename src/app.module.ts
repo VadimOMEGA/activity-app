@@ -20,6 +20,7 @@ import { AdminModule } from './admin/admin.module';
 import { BlogTagsModule } from './blog-tags/blog-tags.module';
 import { BlogPostsModule } from './blog-posts/blog-posts.module';
 import { FestivalEditionsModule } from './festival-editions/festival-editions.module';
+import { FestivalEditionsGalleryPhotosModule } from './festival-editions-gallery-photos/festival-editions-gallery-photos.module';
 
 @Module({
 	imports: [
@@ -43,7 +44,8 @@ import { FestivalEditionsModule } from './festival-editions/festival-editions.mo
 		AdminModule,
 		BlogTagsModule,
 		BlogPostsModule,
-		FestivalEditionsModule
+		FestivalEditionsModule,
+		FestivalEditionsGalleryPhotosModule
 	]
 })
 export class AppModule {}
