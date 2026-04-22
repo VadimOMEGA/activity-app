@@ -110,4 +110,30 @@ export class BlogPostsService {
 		await this.getById(id)
 		return this.prisma.blogPost.delete({ where: { id } })
 	}
+
+	async publish(id: string) {
+		const post = await this.getById(id)
+
+		if (post.publishedAt) {
+			throw new BadRequestException('Blog post is already published')
+		}
+
+		return this.prisma.blogPost.update({
+			where: { id },
+			data: { publishedAt: new Date() }
+		})
+	}
+
+	async unpublish(id: string) {
+		const post = await this.getById(id)
+
+		if (!post.publishedAt) {
+			throw new BadRequestException('Blog post is not published')
+		}
+
+		return this.prisma.blogPost.update({
+			where: { id },
+			data: { publishedAt: null }
+		})
+	}
 }

@@ -36,4 +36,14 @@ export class BlogPostsController {
 	remove(@Param('id') id: string) {
 		return this.blogPostsService.remove(id)
 	}
+
+	@Patch(':id/publish')
+	publish(@Param('id') id: string) {
+		return this.blogPostsService.publish(id)
+	}
+
+	@Patch(':id/unpublish')
+	unpublish(@Param('id') id: string) {
+		return this.blogPostsService.unpublish(id)
+	}
 }
