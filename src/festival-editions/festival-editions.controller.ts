@@ -1,13 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common'
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Param,
+	Delete,
+	HttpCode,
+	UsePipes,
+	ValidationPipe
+} from '@nestjs/common'
 import { FestivalEditionsService } from './festival-editions.service'
 import { FestivalEditionDto } from './dto/festival-edition.dto'
 import { UpdateFestivalEditionDto } from './dto/update-festival-edition.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { UsePipes, ValidationPipe } from '@nestjs/common'
+import { FestivalEditionUploadIntentDto } from './dto/festival-edition-upload-intent.dto'
 
 @Controller('festival-editions')
 export class FestivalEditionsController {
 	constructor(private readonly festivalEditionsService: FestivalEditionsService) {}
+
+	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
+	@HttpCode(200)
+	@Post('upload-intents')
+	@Auth('ADMIN')
+	createUploadIntents(@Body() dto: FestivalEditionUploadIntentDto) {
+		return this.festivalEditionsService.createUploadIntents(dto)
+	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
