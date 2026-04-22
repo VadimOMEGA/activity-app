@@ -19,6 +19,7 @@ import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tut
 import { AdminModule } from './admin/admin.module';
 import { BlogTagsModule } from './blog-tags/blog-tags.module';
 import { BlogPostsModule } from './blog-posts/blog-posts.module';
+import { FestivalEditionsModule } from './festival-editions/festival-editions.module';
 
 @Module({
 	imports: [
@@ -41,7 +42,8 @@ import { BlogPostsModule } from './blog-posts/blog-posts.module';
 		TutorAgreementSignaturesModule,
 		AdminModule,
 		BlogTagsModule,
-		BlogPostsModule
+		BlogPostsModule,
+		FestivalEditionsModule
 	]
 })
 export class AppModule {}
