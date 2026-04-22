@@ -377,8 +377,8 @@ DTO validări cheie festival:
   - sectionId `IsString`; 
   - title `IsString` `MaxLength(200)`; 
   - description `IsOptional` `IsString` `MaxLength(5000)`; 
-  - activityType `IsEnum`; 
-  - audience `IsIn public|guests|staff`
+  - activityType `IsEnum(FestivalActivityType)`; 
+  - audience `IsEnum(ActivityAudienceType)`
 - Volunteer DTO: 
   - editionId `IsString`; 
   - profileId `IsString`

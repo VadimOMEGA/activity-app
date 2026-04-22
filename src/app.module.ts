@@ -21,6 +21,8 @@ import { BlogTagsModule } from './blog-tags/blog-tags.module';
 import { BlogPostsModule } from './blog-posts/blog-posts.module';
 import { FestivalEditionsModule } from './festival-editions/festival-editions.module';
 import { FestivalEditionsGalleryPhotosModule } from './festival-editions-gallery-photos/festival-editions-gallery-photos.module';
+import { FestivalSectionsModule } from './festival-sections/festival-sections.module';
+import { FestivalActivitiesModule } from './festival-activities/festival-activities.module';
 
 @Module({
 	imports: [
@@ -45,7 +47,9 @@ import { FestivalEditionsGalleryPhotosModule } from './festival-editions-gallery
 		BlogTagsModule,
 		BlogPostsModule,
 		FestivalEditionsModule,
-		FestivalEditionsGalleryPhotosModule
+		FestivalEditionsGalleryPhotosModule,
+		FestivalSectionsModule,
+		FestivalActivitiesModule
 	]
 })
 export class AppModule {}
