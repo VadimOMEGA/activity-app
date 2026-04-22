@@ -17,7 +17,7 @@ model FestivalVolunteer {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    festivalLocation FestivalLocation[]
+    festivalLocations FestivalLocation[]
 
     @@unique([editionId, profileId])
     @@map("festival_volunteers")

@@ -23,6 +23,8 @@ import { FestivalEditionsModule } from './festival-editions/festival-editions.mo
 import { FestivalEditionsGalleryPhotosModule } from './festival-editions-gallery-photos/festival-editions-gallery-photos.module';
 import { FestivalSectionsModule } from './festival-sections/festival-sections.module';
 import { FestivalActivitiesModule } from './festival-activities/festival-activities.module';
+import { FestivalVolunteersModule } from './festival-volunteers/festival-volunteers.module';
+import { FesivalLocationsModule } from './fesival-locations/fesival-locations.module';
 
 @Module({
 	imports: [
@@ -49,7 +51,9 @@ import { FestivalActivitiesModule } from './festival-activities/festival-activit
 		FestivalEditionsModule,
 		FestivalEditionsGalleryPhotosModule,
 		FestivalSectionsModule,
-		FestivalActivitiesModule
+		FestivalActivitiesModule,
+		FestivalVolunteersModule,
+		FesivalLocationsModule
 	]
 })
 export class AppModule {}
