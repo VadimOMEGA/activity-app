@@ -12,7 +12,7 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
 4. Faza 3: Implementare NestJS Auth + RBAC + Profiles
 5. Faza 4: Implementare module core (Members, Meetups, Dojo, General Assembly)
 6. Faza 5: Modelare Prisma pentru Festival + Blog
-7. Faza 6: Migrarea 0002 festival și trigger redeem limit
+7. Faza 6: Generarea tipurilor TypeScript
 8. Faza 7: Implementare module Festival + Blog
 9. Faza 8: Validare finală, seed, testare și hardening
 
@@ -335,21 +335,10 @@ Festival program + sponsori + ticketing:
 - festival_discount_redeemings: PK id; FK ticket_id -> festival_tickets.id; FK discount_location_id
   -> festival_sponsor_discount_locations.id; redeemed_at; UNIQUE(ticket_id, discount_location_id)
 
-## Faza 6: Migrarea 0002 Festival
+## Faza 6: Generarea tipurilor TypeScript
+Generezi tipurile TypeScript pentru Prisma Client:
 
-1. Rulezi migrare festival:
-
-- npx prisma migrate dev --name 0002_festival_difffusion
-
-2. Adaugi trigger manual în SQL pentru redeem_max:
-
-- înainte de insert în festival_discount_redeemings verifici count per discount_location_id vs
-  redeem_max
-
-3. Regenerare și verificare:
-
-- npx prisma generate
-- teste de integrare pentru scenariu limită redeem
+- `npx prisma generate`
 
 ## Faza 7: Implementare module Festival + Blog
 
