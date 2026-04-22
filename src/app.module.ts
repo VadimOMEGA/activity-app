@@ -17,6 +17,8 @@ import { AgreementDocumentsModule } from './agreement-documents/agreement-docume
 import { MentorAgreementSignaturesModule } from './mentor-agreement-signatures/mentor-agreement-signatures.module';
 import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tutor-agreement-signatures.module';
 import { AdminModule } from './admin/admin.module';
+import { BlogTagsModule } from './blog-tags/blog-tags.module';
+import { BlogPostsModule } from './blog-posts/blog-posts.module';
 
 @Module({
 	imports: [
@@ -37,7 +39,9 @@ import { AdminModule } from './admin/admin.module';
 		AgreementDocumentsModule,
 		MentorAgreementSignaturesModule,
 		TutorAgreementSignaturesModule,
-		AdminModule
+		AdminModule,
+		BlogTagsModule,
+		BlogPostsModule
 	]
 })
 export class AppModule {}

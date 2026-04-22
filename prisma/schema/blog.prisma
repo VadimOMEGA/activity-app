@@ -16,7 +16,7 @@ model BlogPost {
     title       String
     slug        String    @unique
     summary     String
-    body        String
+    body        Json
     publishedAt DateTime? @map("published_at")
 
     createdAt    DateTime      @default(now()) @map("created_at")

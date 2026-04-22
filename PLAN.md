@@ -353,6 +353,16 @@ Ordine recomandată:
 7. festival-sponsors + discount-locations
 8. festival-tickets + redeemings
 
+DTO validări cheie blog:
+
+- Tag DTO: 
+  - name `IsString` `MinLength(2)` `MaxLength(120)`
+- Post DTO: 
+  - title `IsString` `MinLength(2)` `MaxLength(255)`; 
+  - slug `IsString` `MinLength(2)` `MaxLength(255)`; 
+  - summary `IsOptional` `IsString` `MaxLength(500)`; 
+  - body `IsString` `MinLength(2)`
+
 DTO validări cheie festival:
 
 - Edition DTO: 
