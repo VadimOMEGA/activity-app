@@ -1,0 +1,20 @@
+model FestivalLocation {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    name        String
+    address     String
+    description String
+
+    coordinatorId String            @map("coordinator_id")
+    coordinator   FestivalVolunteer @relation(fields: [coordinatorId], references: [id], onDelete: Restrict)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    festivalPrograms FestivalProgram[]
+
+    @@map("festival_locations")
+}

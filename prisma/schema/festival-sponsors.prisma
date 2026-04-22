@@ -1,0 +1,69 @@
+enum SponsorshipType {
+    MEDIA
+    INSTITUTION
+    CATERING
+    PUBLISHING
+    OTHER
+}
+
+enum SponsorshipLevel {
+    WHISPERER
+    CHARMER
+    LOUDSPEAKER
+    DIFFUSION_VOICE
+}
+
+model FestivalSponsor {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    name     String
+    type     SponsorshipType
+    level    SponsorshipLevel
+    logoFile String           @map("logo_file")
+    website  String
+
+    createdAt                        DateTime                          @default(now()) @map("created_at")
+    updatedAt                        DateTime                          @updatedAt @map("updated_at")
+    festivalSponsorDiscountLocations FestivalSponsorDiscountLocation[]
+
+    @@map("festival_sponsors")
+}
+
+model FestivalSponsorDiscountLocation {
+    id String @id @default(cuid())
+
+    sponsorId String          @map("sponsor_id")
+    sponsor   FestivalSponsor @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+
+    name            String
+    address         String
+    discountPercent Int    @default(0) @map("discount_percent")
+    redeemMax       Int    @map("redeem_max")
+
+    createdAt                  DateTime                     @default(now()) @map("created_at")
+    updatedAt                  DateTime                     @updatedAt @map("updated_at")
+    festivalDiscountRedeemings FestivalDiscountRedeeming[]
+
+    @@map("festival_sponsor_discount_locations")
+}
+
+model FestivalDiscountRedeeming {
+    id String @id @default(cuid())
+
+    ticketId String         @map("ticket_id")
+    ticket   FestivalTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+    discountLocationId String                          @map("discount_location_id")
+    discountLocation   FestivalSponsorDiscountLocation @relation(fields: [discountLocationId], references: [id], onDelete: Cascade)
+
+    redeemedAt DateTime @default(now()) @map("redeemed_at")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@unique([ticketId, discountLocationId])
+    @@map("festival_discount_redeemings")
+}

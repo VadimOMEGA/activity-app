@@ -85,7 +85,7 @@ model MentorAgreementSignature {
     mentor   DojoMentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
 
     documentId String            @map("document_id")
-    document   AgreementDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+    document   AgreementDocument @relation(fields: [documentId], references: [id], onDelete: Restrict)
 
     signedAt DateTime @map("signed_at")
 
@@ -103,7 +103,7 @@ model TutorAgreementSignature {
     tutor   DojoTutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
     documentId String            @map("document_id")
-    document   AgreementDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+    document   AgreementDocument @relation(fields: [documentId], references: [id], onDelete: Restrict)
 
     signedAt DateTime @map("signed_at")
 

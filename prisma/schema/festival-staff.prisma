@@ -1,0 +1,67 @@
+enum GuestRole {
+    SPEAKER
+    WORKSHOP_ORGANIZER
+    ARTIST
+    OTHER
+}
+
+model FestivalVolunteer {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    profileId String  @unique @map("profile_id")
+    profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    festivalLocation FestivalLocation[]
+
+    @@unique([editionId, profileId])
+    @@map("festival_volunteers")
+}
+
+model FestivalStaffMember {
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    memberId String @map("member_id")
+    member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@id([editionId, memberId])
+    @@map("festival_staff_members")
+}
+
+model FestivalGuest {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    profileId String  @unique @map("profile_id")
+    profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+    createdAt          DateTime            @default(now()) @map("created_at")
+    updatedAt          DateTime            @updatedAt @map("updated_at")
+
+    festivalGuestRoles FestivalGuestRole[]
+    festivalProgramPresenters FestivalProgramPresenter[]
+
+    @@unique([editionId, profileId])
+    @@map("festival_guests")
+}
+
+model FestivalGuestRole {
+    guestId String        @map("guest_id")
+    guest   FestivalGuest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+    role GuestRole
+
+    @@id([guestId, role])
+    @@map("festival_guest_roles")
+}

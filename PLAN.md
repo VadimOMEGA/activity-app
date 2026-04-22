@@ -366,24 +366,57 @@ Ordine recomandată:
 
 DTO validări cheie festival:
 
-- Edition DTO: year IsInt Min(2020) Max(2100); title/theme IsString MaxLength(255); culori Matches
-  regex hex; file fields IsOptional IsString MaxLength(255)
-- Section DTO: editionId IsInt; name IsString MinLength(2) MaxLength(120)
-- Activity DTO: sectionId IsInt; title IsString MaxLength(200); description IsOptional IsString
-  MaxLength(5000); activityType IsIn enum; audience IsIn public|guests|staff
-- Volunteer DTO: editionId IsInt; profileId IsInt
-- Location DTO: editionId IsInt; name IsString MaxLength(200); address IsOptional IsString
-  MaxLength(255); coordinatorId IsOptional IsInt
-- Guest DTO: editionId IsInt; profileId IsInt
-- GuestRole DTO: guestId IsInt; role IsIn speaker|workshop_org|artist|other
-- Program DTO: editionId IsInt; locationId IsInt; activityId IsInt; startsAt IsDateString; endsAt
-  IsOptional IsDateString
-- Sponsor DTO: editionId IsInt; name IsString MaxLength(200); sponsorshipType IsIn enum;
-  sponsorshipLevel IsIn enum; website IsOptional IsUrl
-- DiscountLocation DTO: sponsorId IsInt; name IsString; address IsOptional IsString; discountPercent
-  IsInt Min(1) Max(100); redeemMax IsInt Min(1)
-- Ticket DTO: editionId IsInt; holderProfileId IsInt; code IsString MinLength(6) MaxLength(64);
-  guestCount IsInt Min(0) Max(5)
+- Edition DTO: 
+  - year `IsInt` `Min(2020)` `Max(2100)`; 
+  - title/theme `IsString` `MaxLength(255)`; 
+  - culori `Matches regex hex`; 
+  - file fields `IsOptional` `IsString` `MaxLength(255)`
+- Section DTO: 
+  - editionId `IsString`; 
+  - name `IsString` `MinLength(2)` `MaxLength(120)`
+- Activity DTO: 
+  - sectionId `IsString`; 
+  - title `IsString` `MaxLength(200)`; 
+  - description `IsOptional` `IsString` `MaxLength(5000)`; 
+  - activityType `IsEnum`; 
+  - audience `IsIn public|guests|staff`
+- Volunteer DTO: 
+  - editionId `IsString`; 
+  - profileId `IsString`
+- Location DTO: 
+  - editionId `IsString`; 
+  - name `IsString` `MaxLength(200)`; 
+  - address `IsOptional` `IsString` `MaxLength(255)`; 
+  - coordinatorId `IsOptional` `IsString`
+- Guest DTO: 
+  - editionId `IsString`; 
+  profileId `IsString`
+- GuestRole DTO: 
+  - guestId `IsString`; 
+  - role `IsIn speaker|workshop_org|artist|other`
+- Program DTO: 
+  - editionId `IsString`; 
+  - locationId `IsString`; 
+  - activityId `IsString`; 
+  - startsAt `IsDateString`; 
+  - endsAt `IsOptional` `IsDateString`
+- Sponsor DTO: 
+  - editionId `IsString`; 
+  - name `IsString` `MaxLength(200)`; 
+  - sponsorshipType `IsEnum`;
+  - sponsorshipLevel `IsEnum`; 
+  - website `IsOptional` `IsUrl`;
+- DiscountLocation DTO: 
+  - sponsorId `IsString`; 
+  - name `IsString`; 
+  - address `IsOptional` `IsString`; 
+  - discountPercent `IsInt` `Min(1)` `Max(100)`; 
+  - redeemMax `IsInt` `Min(1)`
+- Ticket DTO: 
+  - editionId `IsString`; 
+  - holderProfileId `IsString`; 
+  - code `IsString` `MinLength(6)` `MaxLength(64)`;
+  - guestCount `IsInt` `Min(0)` `Max(5)`
 - Redeeming DTO: ticketId IsInt; discountLocationId IsInt; redeemedAt IsDateString
 
 ## Faza 8: Verificare, seed, testare și hardening

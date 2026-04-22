@@ -1,0 +1,49 @@
+model FestivalEdition {
+    id String @id @default(cuid())
+
+    year               Int    @unique
+    title              String
+    theme              String
+    customLogoFile     String @map("custom_logo_file")
+    heroImageFile      String @map("hero_image_file")
+    shortDescription   String @map("short_description")
+    longDescription    String @map("long_description")
+    secondaryImageFile String @map("secondary_image_file")
+    accentImageFile    String @map("accent_image_file")
+    mainColor          String @map("main_color")
+    accentColor        String @map("accent_color")
+    afterVideoFile     String @map("after_video_file")
+
+    blogTagId String
+    blogTag   BlogTag @relation(fields: [blogTagId], references: [id], onDelete: Restrict)
+
+    createdAt                    DateTime                      @default(now()) @map("created_at")
+    updatedAt                    DateTime                      @updatedAt @map("updated_at")
+    festivalEditionGalleryPhotos FestivalEditionGalleryPhoto[]
+    festivalSections             FestivalSection[]
+    festivalVolunteers           FestivalVolunteer[]
+    festivalStaffMembers         FestivalStaffMember[]
+    festivalGuests               FestivalGuest[]
+    festivalLocations            FestivalLocation[]
+    festivalPrograms             FestivalProgram[]
+    festivalSponsors             FestivalSponsor[]
+    festivalTickets              FestivalTicket[]
+
+    @@map("festival_editions")
+}
+
+model FestivalEditionGalleryPhoto {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    photoFile String @unique @map("photo_file")
+    caption   String
+    sortOrder Int    @map("sort_order")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("festival_editions_gallery_photos")
+}

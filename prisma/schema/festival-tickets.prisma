@@ -1,0 +1,20 @@
+model FestivalTicket {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    holderProfileId String  @map("holder_profile_id")
+    holderProfile   Profile @relation(fields: [holderProfileId], references: [id], onDelete: Cascade)
+
+    code       String @unique @default(cuid())
+    guestCount Int    @default(0) @map("guest_count")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    festivalDiscountRedeemings FestivalDiscountRedeeming[]
+
+    @@unique([editionId, code])
+    @@map("festival_tickets")
+}

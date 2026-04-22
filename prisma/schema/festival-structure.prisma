@@ -1,0 +1,50 @@
+enum FestivalActivityType {
+    TALK_PANEL
+    TALK_KEYNOTE
+    INSTALLATION
+    WORKSHOP
+    SOCIAL_TOUR
+    SOCIAL_DINNER
+    SOCIAL_CONCERT
+    STAFF_ROUNDUP
+}
+
+enum ActivityAudienceType {
+    PUBLIC
+    GUESTS
+    STAFF
+}
+
+model FestivalSection {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    name String
+
+    createdAt          DateTime           @default(now()) @map("created_at")
+    updatedAt          DateTime           @updatedAt @map("updated_at")
+    festivalActivities FestivalActivity[]
+
+    @@map("festival_sections")
+}
+
+model FestivalActivity {
+    id String @id @default(cuid())
+
+    sectionId String          @map("section_id")
+    section   FestivalSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+    title        String
+    description  String
+    audience     ActivityAudienceType
+    activityType FestivalActivityType @map("activity_type")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    festivalPrograms FestivalProgram[]
+
+    @@map("festival_activities")
+}

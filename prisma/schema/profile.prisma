@@ -8,13 +8,16 @@ model Profile {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
-  user      User?
-  member    Member?
-  meetupWorkshop MeetupWorkshop[]
-  dojoMentor DojoMentor?
-  dojoTutor DojoTutor?
-  dojoNinja DojoNinja?
+
+  user              User?
+  member            Member?
+  meetupWorkshop    MeetupWorkshop[]
+  dojoMentor        DojoMentor?
+  dojoTutor         DojoTutor?
+  dojoNinja         DojoNinja?
+  festivalVolunteer FestivalVolunteer?
+  festivalGuest     FestivalGuest?
+  festivalTickets   FestivalTicket[]
 
   @@map("profiles")
 }

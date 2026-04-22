@@ -1,0 +1,35 @@
+model FestivalProgram {
+    id String @id @default(cuid())
+
+    editionId String          @map("edition_id")
+    edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+
+    locationId String           @map("location_id")
+    location   FestivalLocation @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+    activityId String
+    activity   FestivalActivity @relation(fields: [activityId], references: [id], onDelete: Restrict)
+
+    startsAt DateTime @map("starts_at")
+    endsAt   DateTime @map("ends_at")
+
+    createdAt                 DateTime                   @default(now()) @map("created_at")
+    updatedAt                 DateTime                   @updatedAt @map("updated_at")
+    festivalProgramPresenters FestivalProgramPresenter[]
+
+    @@map("festival_programs")
+}
+
+model FestivalProgramPresenter {
+    programId String          @map("program_id")
+    program   FestivalProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+    guestId String        @map("guest_id")
+    guest   FestivalGuest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@id([programId, guestId])
+    @@map("festival_program_presenters")
+}

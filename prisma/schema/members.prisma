@@ -30,6 +30,7 @@ model Member {
     fullMember      FullMember?
     membershipFees  MembershipFee[]
     generalAssemblyAttendee GeneralAssemblyAttendee[]
+    festivalStaffMembers FestivalStaffMember[]
 
     @@map("members")
 }
@@ -54,7 +55,7 @@ model MembershipFee {
     id        String              @id @default(cuid())
 
     memberId  String              @map("member_id")
-    member    Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+    member    Member              @relation(fields: [memberId], references: [id], onDelete: Restrict)
 
     year      Int
     amount    Decimal
