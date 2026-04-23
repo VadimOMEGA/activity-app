@@ -30,6 +30,7 @@ import { FestivalGuestsModule } from './festival-guests/festival-guests.module';
 import { FestivalProgramsModule } from './festival-programs/festival-programs.module';
 import { FestivalSponsorsModule } from './festival-sponsors/festival-sponsors.module';
 import { FestivalSponsorDiscountLocationsModule } from './festival-sponsor-discount-locations/festival-sponsor-discount-locations.module';
+import { FestivalTicketsModule } from './festival-tickets/festival-tickets.module';
 
 @Module({
 	imports: [
@@ -63,7 +64,8 @@ import { FestivalSponsorDiscountLocationsModule } from './festival-sponsor-disco
 		FestivalGuestsModule,
 		FestivalProgramsModule,
 		FestivalSponsorsModule,
-		FestivalSponsorDiscountLocationsModule
+		FestivalSponsorDiscountLocationsModule,
+		FestivalTicketsModule
 	]
 })
 export class AppModule {}
