@@ -78,16 +78,13 @@ modelării, iar regulile care nu pot fi exprimate direct se implementează în a
    - src/members
    - src/membership-fees
    - src/meetups
-   - src/dojo-mentors
-   - src/dojo-tutors
-   - src/dojo-ninjas
-   - src/dojo-sessions
+   - src/dojo-[*]
    - src/agreement-documents
    - src/mentor-agreement-signatures
    - src/tutor-agreement-signatures
    - src/general-assemblies
-   - src/festival
-   - src/blog
+   - src/festival-[*]
+   - src/blog-[*]
    - prisma.service.ts
    - app.module.ts
    - main.ts
@@ -419,7 +416,6 @@ DTO validări cheie festival:
 - Redeeming DTO: 
   - ticketId `IsString`; 
   - discountLocationId `IsString`; 
-  - redeemedAt `IsDateString`
 
 ## Faza 8: Verificare, seed, testare și hardening
 
