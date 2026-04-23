@@ -27,6 +27,7 @@ import { FestivalVolunteersModule } from './festival-volunteers/festival-volunte
 import { FesivalLocationsModule } from './fesival-locations/fesival-locations.module';
 import { FestivalStaffMembersModule } from './festival-staff-members/festival-staff-members.module';
 import { FestivalGuestsModule } from './festival-guests/festival-guests.module';
+import { FestivalProgramsModule } from './festival-programs/festival-programs.module';
 
 @Module({
 	imports: [
@@ -57,7 +58,8 @@ import { FestivalGuestsModule } from './festival-guests/festival-guests.module';
 		FestivalVolunteersModule,
 		FesivalLocationsModule,
 		FestivalStaffMembersModule,
-		FestivalGuestsModule
+		FestivalGuestsModule,
+		FestivalProgramsModule
 	]
 })
 export class AppModule {}
