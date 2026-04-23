@@ -404,12 +404,12 @@ DTO validări cheie festival:
   - name `IsString` `MaxLength(200)`; 
   - sponsorshipType `IsEnum`;
   - sponsorshipLevel `IsEnum`; 
-  - website `IsOptional` `IsUrl`;
+  - website `IsUrl`;
 - DiscountLocation DTO: 
   - sponsorId `IsString`; 
   - name `IsString`; 
-  - address `IsOptional` `IsString`; 
-  - discountPercent `IsInt` `Min(1)` `Max(100)`; 
+  - address `IsString`; 
+  - discountPercent `IsInt` `Min(0)` `Max(100)`; 
   - redeemMax `IsInt` `Min(1)`
 - Ticket DTO: 
   - editionId `IsString`; 

@@ -200,6 +200,7 @@ export class FestivalEditionsService {
 			}
 		} catch (error) {
 			console.error(`Failed to delete old file from S3: ${url}`, error)
+			throw new NotFoundException('Failed to delete old file from S3')
 		}
 	}
 }
