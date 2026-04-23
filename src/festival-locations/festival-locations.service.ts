@@ -4,7 +4,7 @@ import { FestivalLocationDto } from './dto/festival-location.dto'
 import { UpdateFestivalLocationDto } from './dto/update-festival-location.dto'
 
 @Injectable()
-export class FesivalLocationsService {
+export class FestivalLocationsService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async getAllByEditionId(editionId: string) {

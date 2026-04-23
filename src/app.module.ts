@@ -12,25 +12,25 @@ import { DojoMentorsModule } from './dojo-mentors/dojo-mentors.module'
 import { DojoTutorsModule } from './dojo-tutors/dojo-tutors.module'
 import { DojoNinjasModule } from './dojo-ninjas/dojo-ninjas.module'
 import { DojoSessionsModule } from './dojo-sessions/dojo-sessions.module'
-import { S3Module } from './s3/s3.module';
-import { AgreementDocumentsModule } from './agreement-documents/agreement-documents.module';
-import { MentorAgreementSignaturesModule } from './mentor-agreement-signatures/mentor-agreement-signatures.module';
-import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tutor-agreement-signatures.module';
-import { AdminModule } from './admin/admin.module';
-import { BlogTagsModule } from './blog-tags/blog-tags.module';
-import { BlogPostsModule } from './blog-posts/blog-posts.module';
-import { FestivalEditionsModule } from './festival-editions/festival-editions.module';
-import { FestivalEditionsGalleryPhotosModule } from './festival-editions-gallery-photos/festival-editions-gallery-photos.module';
-import { FestivalSectionsModule } from './festival-sections/festival-sections.module';
-import { FestivalActivitiesModule } from './festival-activities/festival-activities.module';
-import { FestivalVolunteersModule } from './festival-volunteers/festival-volunteers.module';
-import { FesivalLocationsModule } from './fesival-locations/fesival-locations.module';
-import { FestivalStaffMembersModule } from './festival-staff-members/festival-staff-members.module';
-import { FestivalGuestsModule } from './festival-guests/festival-guests.module';
-import { FestivalProgramsModule } from './festival-programs/festival-programs.module';
-import { FestivalSponsorsModule } from './festival-sponsors/festival-sponsors.module';
-import { FestivalSponsorDiscountLocationsModule } from './festival-sponsor-discount-locations/festival-sponsor-discount-locations.module';
-import { FestivalTicketsModule } from './festival-tickets/festival-tickets.module';
+import { S3Module } from './s3/s3.module'
+import { AgreementDocumentsModule } from './agreement-documents/agreement-documents.module'
+import { MentorAgreementSignaturesModule } from './mentor-agreement-signatures/mentor-agreement-signatures.module'
+import { TutorAgreementSignaturesModule } from './tutor-agreement-signatures/tutor-agreement-signatures.module'
+import { AdminModule } from './admin/admin.module'
+import { BlogTagsModule } from './blog-tags/blog-tags.module'
+import { BlogPostsModule } from './blog-posts/blog-posts.module'
+import { FestivalEditionsModule } from './festival-editions/festival-editions.module'
+import { FestivalEditionsGalleryPhotosModule } from './festival-editions-gallery-photos/festival-editions-gallery-photos.module'
+import { FestivalSectionsModule } from './festival-sections/festival-sections.module'
+import { FestivalActivitiesModule } from './festival-activities/festival-activities.module'
+import { FestivalVolunteersModule } from './festival-volunteers/festival-volunteers.module'
+import { FestivalLocationsModule } from './festival-locations/festival-locations.module'
+import { FestivalStaffMembersModule } from './festival-staff-members/festival-staff-members.module'
+import { FestivalGuestsModule } from './festival-guests/festival-guests.module'
+import { FestivalProgramsModule } from './festival-programs/festival-programs.module'
+import { FestivalSponsorsModule } from './festival-sponsors/festival-sponsors.module'
+import { FestivalSponsorDiscountLocationsModule } from './festival-sponsor-discount-locations/festival-sponsor-discount-locations.module'
+import { FestivalTicketsModule } from './festival-tickets/festival-tickets.module'
 
 @Module({
 	imports: [
@@ -59,7 +59,7 @@ import { FestivalTicketsModule } from './festival-tickets/festival-tickets.modul
 		FestivalSectionsModule,
 		FestivalActivitiesModule,
 		FestivalVolunteersModule,
-		FesivalLocationsModule,
+		FestivalLocationsModule,
 		FestivalStaffMembersModule,
 		FestivalGuestsModule,
 		FestivalProgramsModule,
