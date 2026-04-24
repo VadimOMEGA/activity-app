@@ -9,8 +9,6 @@ import { CreateGalleryPhotoUploadIntentDto } from './dto/create-gallery-photo-up
 
 @Injectable()
 export class FestivalEditionsGalleryPhotosService {
-	private readonly allowedUploadExtensions = ['jpg', 'jpeg', 'png', 'webp']
-
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly s3Service: S3Service

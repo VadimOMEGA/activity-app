@@ -122,7 +122,7 @@ export class FestivalEditionsService {
 			const oldValue = existingEdition[field]
 
 			if (newValue && oldValue && newValue !== oldValue) {
-				await this.tryDeleteOldFile(oldValue)
+				await this.s3Service.tryDeleteOldFile(oldValue)
 			}
 		}
 
@@ -150,7 +150,7 @@ export class FestivalEditionsService {
 		for (const field of fileFields) {
 			const url = existingEdition[field]
 			if (url) {
-				await this.tryDeleteOldFile(url)
+				await this.s3Service.tryDeleteOldFile(url)
 			}
 		}
 
@@ -169,7 +169,7 @@ export class FestivalEditionsService {
 		for (const field of fileFields) {
 			const url = dto[field]
 			if (url) {
-				const key = this.extractKeyFromUrl(url)
+				const key = this.s3Service.extractKeyFromUrl(url)
 				if (key) {
 					const exists = await this.s3Service.objectExists(key)
 					if (!exists) {
@@ -179,28 +179,6 @@ export class FestivalEditionsService {
 					}
 				}
 			}
-		}
-	}
-
-	private extractKeyFromUrl(url: string): string | null {
-		const urlParts = url.split('/')
-		const bucketName = this.s3Service.bucketName
-		const bucketIndex = urlParts.indexOf(bucketName)
-
-		if (bucketIndex === -1) return null
-
-		return urlParts.slice(bucketIndex + 1).join('/')
-	}
-
-	private async tryDeleteOldFile(url: string) {
-		try {
-			const key = this.extractKeyFromUrl(url)
-			if (key) {
-				await this.s3Service.deleteObject(key)
-			}
-		} catch (error) {
-			console.error(`Failed to delete old file from S3: ${url}`, error)
-			throw new NotFoundException('Failed to delete old file from S3')
 		}
 	}
 }

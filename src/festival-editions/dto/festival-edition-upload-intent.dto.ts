@@ -1,10 +1,19 @@
-import { IsInt, IsNotEmpty, IsString, IsArray, ValidateNested, IsOptional } from 'class-validator'
+import {
+	IsInt,
+	IsNotEmpty,
+	IsString,
+	IsArray,
+	ValidateNested,
+	IsOptional,
+	IsIn
+} from 'class-validator'
 import { Type } from 'class-transformer'
 
 export class FileUploadIntentItemDto {
 	@IsString()
 	@IsNotEmpty()
-	role!: string // logo, hero, secondary, accent, video
+	@IsIn(['logo', 'hero', 'secondary', 'accent', 'video'])
+	role!: string
 
 	@IsString()
 	@IsNotEmpty()

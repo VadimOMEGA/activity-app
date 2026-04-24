@@ -6,10 +6,6 @@ export class FestivalTicketDto extends ProfileDto {
 	@IsNotEmpty()
 	editionId!: string
 
-	@IsString()
-	@IsNotEmpty()
-	holderProfileId!: string
-
 	@IsInt()
 	@Min(0)
 	@Max(5)

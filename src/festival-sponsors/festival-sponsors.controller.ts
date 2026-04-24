@@ -14,13 +14,14 @@ import { FestivalSponsorsService } from './festival-sponsors.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { FestivalSponsorUploadIntentDto } from './dto/festival-sponsor-upload-intent.dto'
 import { FestivalSponsorDto } from './dto/festival-sponsor.dto'
+import { UpdateFestivalSponsorDto } from './dto/update-festival-sponsor.dto'
 
 @Controller('festival-sponsors')
 export class FestivalSponsorsController {
 	constructor(private readonly festivalSponsorsService: FestivalSponsorsService) {}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('/edition/:editionId/upload-intents')
 	@Auth('ADMIN')
 	createUploadIntents(
@@ -31,7 +32,7 @@ export class FestivalSponsorsController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post()
 	@Auth('ADMIN')
 	create(@Body() dto: FestivalSponsorDto) {
@@ -56,7 +57,7 @@ export class FestivalSponsorsController {
 	@HttpCode(200)
 	@Put(':id')
 	@Auth('ADMIN')
-	update(@Param('id') id: string, @Body() dto: FestivalSponsorDto) {
+	update(@Param('id') id: string, @Body() dto: UpdateFestivalSponsorDto) {
 		return this.festivalSponsorsService.update(id, dto)
 	}
 

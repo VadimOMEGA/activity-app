@@ -165,15 +165,25 @@ export class S3Service {
 		}
 	}
 
-	private validateSlug(slug: string) {
-		if (!slug || slug.trim().length === 0) {
-			throw new BadRequestException('Slug is required')
-		}
+	// Helpers
+	extractKeyFromUrl(url: string): string | null {
+		const urlParts = url.split('/')
+		const bucketName = this.bucketName
+		const bucketIndex = urlParts.indexOf(bucketName)
 
-		if (!this.slugRegex.test(slug)) {
-			throw new BadRequestException(
-				'Invalid slug format. Use lowercase letters, numbers and single hyphens only'
-			)
+		if (bucketIndex === -1) return null
+
+		return urlParts.slice(bucketIndex + 1).join('/')
+	}
+
+	async tryDeleteOldFile(url: string) {
+		try {
+			const key = this.extractKeyFromUrl(url)
+			if (key) {
+				await this.deleteObject(key)
+			}
+		} catch (error) {
+			console.error(`Failed to delete old file from S3: ${url}`, error)
 		}
 	}
 }

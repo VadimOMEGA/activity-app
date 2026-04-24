@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator'
 
-export class AddPresenterDto {
+export class PresenterDto {
 	@IsString()
 	@IsNotEmpty()
 	guestId!: string

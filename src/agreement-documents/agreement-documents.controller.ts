@@ -40,7 +40,7 @@ export class AgreementDocumentsController {
 		return this.agreementDocumentsService.getBySlugWithDownloadUrl(slug)
 	}
 
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post(':id/confirm-upload')
 	@Auth('ADMIN')
 	confirmUpload(@Param('id') id: string) {
@@ -48,7 +48,7 @@ export class AgreementDocumentsController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('create-with-upload-intent')
 	@Auth('ADMIN')
 	createWithUploadIntent(@Body() dto: CreateAgreementDocumentUploadIntentDto) {

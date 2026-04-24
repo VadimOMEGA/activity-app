@@ -21,7 +21,7 @@ export class FestivalSponsorDiscountLocationsController {
 	) {}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Auth('ADMIN')
 	@Post()
 	create(@Body() dto: DiscountLocationDto) {

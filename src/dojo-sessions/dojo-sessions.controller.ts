@@ -34,7 +34,7 @@ export class DojoSessionsController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post()
 	@Auth('ADMIN', 'MENTOR')
 	create(@Body() dto: DojoSessionDto) {

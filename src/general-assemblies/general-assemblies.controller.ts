@@ -5,8 +5,8 @@ import {
 	Get,
 	HttpCode,
 	Param,
-	Patch,
 	Post,
+	Put,
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common'
@@ -35,7 +35,7 @@ export class GeneralAssembliesController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post()
 	@Auth('ADMIN')
 	create(@Body() dto: GeneralAssemblyDto) {
@@ -44,14 +44,14 @@ export class GeneralAssembliesController {
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
-	@Patch(':id')
+	@Put(':id')
 	@Auth('ADMIN')
 	update(@Param('id') id: string, @Body() dto: UpdateGeneralAssemblyDto) {
 		return this.generalAssembliesService.update(id, dto)
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post(':id/attendees')
 	@Auth('ADMIN')
 	addAttendee(@Param('id') id: string, @Body() dto: AddAttendeeDto) {

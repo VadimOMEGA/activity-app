@@ -4,6 +4,7 @@ import {
 	Delete,
 	Get,
 	HttpCode,
+	Param,
 	Patch,
 	Post,
 	UsePipes,
@@ -21,19 +22,19 @@ export class FestivalGuestsController {
 	@HttpCode(200)
 	@Auth('ADMIN')
 	@Get('edition/:editionId')
-	async getAllByEditionId(editionId: string) {
+	async getAllByEditionId(@Param('editionId') editionId: string) {
 		return this.festivalGuestsService.getAllByEditionId(editionId)
 	}
 
 	@HttpCode(200)
 	@Auth('ADMIN')
 	@Get(':id')
-	async getById(id: string) {
+	async getById(@Param('id') id: string) {
 		return this.festivalGuestsService.getById(id)
 	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Auth('ADMIN')
 	@Post()
 	async create(@Body() dto: FestivalGuestDto) {
@@ -44,14 +45,14 @@ export class FestivalGuestsController {
 	@HttpCode(200)
 	@Auth('ADMIN')
 	@Patch(':id/roles')
-	async updateRoles(id: string, @Body() dto: UpdateGuestRolesDto) {
+	async updateRoles(@Param('id') id: string, @Body() dto: UpdateGuestRolesDto) {
 		return this.festivalGuestsService.updateRoles(id, dto)
 	}
 
 	@HttpCode(200)
 	@Auth('ADMIN')
 	@Delete(':id')
-	async delete(id: string) {
+	async delete(@Param('id') id: string) {
 		return this.festivalGuestsService.delete(id)
 	}
 }

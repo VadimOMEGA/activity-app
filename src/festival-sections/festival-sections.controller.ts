@@ -34,7 +34,7 @@ export class FestivalSectionsController {
 	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post()
 	@Auth('ADMIN')
 	create(@Body() dto: FestivalSectionDto) {

@@ -17,6 +17,7 @@ model FestivalProgram {
     updatedAt                 DateTime                   @updatedAt @map("updated_at")
     festivalProgramPresenters FestivalProgramPresenter[]
 
+    @@index([locationId, startsAt, endsAt])
     @@map("festival_programs")
 }
 

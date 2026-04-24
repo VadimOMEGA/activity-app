@@ -2,13 +2,17 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma.service'
 import { FestivalProgramDto } from './dto/festival-program.dto'
 import { UpdateFestivalProgramDto } from './dto/update-festival-program.dto'
-import { AddPresenterDto } from './dto/add-presenter.dto'
+import { PresenterDto } from './dto/add-presenter.dto'
 
 @Injectable()
 export class FestivalProgramsService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async getAllByEditionId(editionId: string) {
+		const edition = await this.prisma.festivalEdition.findUnique({ where: { id: editionId } })
+
+		if (!edition) throw new NotFoundException('Festival edition not found')
+
 		return this.prisma.festivalProgram.findMany({
 			where: { editionId },
 			include: {
@@ -152,7 +156,7 @@ export class FestivalProgramsService {
 		})
 	}
 
-	async addPresenter(programId: string, dto: AddPresenterDto) {
+	async addPresenter(programId: string, dto: PresenterDto) {
 		const existingProgram = await this.prisma.festivalProgram.findUnique({
 			where: { id: programId }
 		})
@@ -173,6 +177,30 @@ export class FestivalProgramsService {
 			data: {
 				programId: programId,
 				guestId: dto.guestId
+			}
+		})
+	}
+
+	async removePresenter(programId: string, dto: PresenterDto) {
+		const existingProgram = await this.prisma.festivalProgram.findUnique({
+			where: { id: programId }
+		})
+
+		if (!existingProgram) {
+			throw new NotFoundException('Program not found')
+		}
+
+		const guest = await this.prisma.festivalGuest.findUnique({
+			where: { id: dto.guestId }
+		})
+
+		if (!guest) {
+			throw new NotFoundException('Guest not found')
+		}
+
+		return this.prisma.festivalProgramPresenter.delete({
+			where: {
+				programId_guestId: { programId, guestId: dto.guestId }
 			}
 		})
 	}

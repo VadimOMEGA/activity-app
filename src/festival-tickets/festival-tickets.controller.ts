@@ -4,6 +4,7 @@ import {
 	Delete,
 	Get,
 	HttpCode,
+	Param,
 	Patch,
 	Post,
 	UsePipes,
@@ -13,6 +14,7 @@ import { FestivalTicketsService } from './festival-tickets.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { FestivalTicketDto } from './dto/festival-ticket.dto'
 import { AddRedeemingDto } from './dto/add-redeeming.dto'
+import { UpdateTicketGuestCountDto } from './dto/update-ticket-guest-count.dto'
 
 @Controller('festival-tickets')
 export class FestivalTicketsController {
@@ -21,19 +23,19 @@ export class FestivalTicketsController {
 	@HttpCode(200)
 	@Get('edition/:editionId')
 	@Auth('ADMIN')
-	getAllByEditionId(editionId: string) {
+	getAllByEditionId(@Param('editionId') editionId: string) {
 		return this.festivalTicketsService.getAllByEditionId(editionId)
 	}
 
 	@HttpCode(200)
 	@Get(':id')
 	@Auth('ADMIN')
-	getById(id: string) {
+	getById(@Param('id') id: string) {
 		return this.festivalTicketsService.getById(id)
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post()
 	@Auth('ADMIN')
 	create(@Body() dto: FestivalTicketDto) {
@@ -44,12 +46,12 @@ export class FestivalTicketsController {
 	@HttpCode(200)
 	@Patch(':id')
 	@Auth('ADMIN')
-	update(@Body() dto: FestivalTicketDto, id: string) {
+	update(@Body() dto: UpdateTicketGuestCountDto, @Param('id') id: string) {
 		return this.festivalTicketsService.update(id, dto)
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('add-redeeming')
 	@Auth('ADMIN')
 	addRedeeming(@Body() dto: AddRedeemingDto) {
@@ -59,7 +61,7 @@ export class FestivalTicketsController {
 	@HttpCode(200)
 	@Delete(':id')
 	@Auth('ADMIN')
-	delete(id: string) {
+	delete(@Param('id') id: string) {
 		return this.festivalTicketsService.delete(id)
 	}
 }

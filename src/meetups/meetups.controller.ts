@@ -36,7 +36,7 @@ export class MeetupsController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('workshop')
 	@Auth('ADMIN')
 	createWorkshop(@Body() dto: WorkshopMeetupDto) {
@@ -44,7 +44,7 @@ export class MeetupsController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('anti-workshop')
 	@Auth('ADMIN')
 	createAntiWorkshop(@Body() dto: AntiWorkshopMeetupDto) {

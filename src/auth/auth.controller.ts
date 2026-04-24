@@ -21,7 +21,7 @@ export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('login')
 	async login(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
 		const { refreshToken, ...response } = await this.authService.login(dto)
@@ -32,7 +32,7 @@ export class AuthController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('register')
 	async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
 		const { refreshToken, ...response } = await this.authService.register(dto)
@@ -42,7 +42,7 @@ export class AuthController {
 		return response
 	}
 
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('login/refresh')
 	async getNewTokens(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
 		const cookies: unknown = req.cookies
@@ -62,7 +62,7 @@ export class AuthController {
 		return response
 	}
 
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('logout')
 	@Auth()
 	logout(@Res({ passthrough: true }) res: Response) {

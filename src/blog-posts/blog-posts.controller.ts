@@ -8,7 +8,8 @@ import {
 	Delete,
 	HttpCode,
 	UsePipes,
-	ValidationPipe
+	ValidationPipe,
+	Put
 } from '@nestjs/common'
 import { BlogPostsService } from './blog-posts.service'
 import { BlogPostDto } from './dto/blog-post.dto'
@@ -20,7 +21,7 @@ export class BlogPostsController {
 	constructor(private readonly blogPostsService: BlogPostsService) {}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post()
 	@Auth('ADMIN')
 	create(@Body() dto: BlogPostDto) {
@@ -50,7 +51,7 @@ export class BlogPostsController {
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
-	@Patch(':id')
+	@Put(':id')
 	@Auth('ADMIN')
 	update(@Param('id') id: string, @Body() dto: UpdateBlogPostDto) {
 		return this.blogPostsService.update(id, dto)

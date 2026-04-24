@@ -34,7 +34,7 @@ export class FestivalLocationsController {
 	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Auth('ADMIN')
 	@Post()
 	async create(@Body() dto: FestivalLocationDto) {
@@ -50,8 +50,8 @@ export class FestivalLocationsController {
 	}
 
 	@HttpCode(200)
-	@Delete(':id')
 	@Auth('ADMIN')
+	@Delete(':id')
 	async delete(@Param('id') id: string) {
 		return this.festivalLocationsService.delete(id)
 	}

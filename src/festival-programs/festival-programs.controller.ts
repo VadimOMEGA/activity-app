@@ -14,7 +14,7 @@ import { FestivalProgramsService } from './festival-programs.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { FestivalProgramDto } from './dto/festival-program.dto'
 import { UpdateFestivalProgramDto } from './dto/update-festival-program.dto'
-import { AddPresenterDto } from './dto/add-presenter.dto'
+import { PresenterDto } from './dto/add-presenter.dto'
 
 @Controller('festival-programs')
 export class FestivalProgramsController {
@@ -35,10 +35,10 @@ export class FestivalProgramsController {
 	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Auth('ADMIN')
 	@Post()
-	create(@Param('editionId') @Body() dto: FestivalProgramDto) {
+	create(@Body() dto: FestivalProgramDto) {
 		return this.festivalProgramsService.create(dto)
 	}
 
@@ -55,11 +55,19 @@ export class FestivalProgramsController {
 	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Auth('ADMIN')
 	@Post(':programId/presenters')
-	addPresenter(@Param('programId') programId: string, @Body() dto: AddPresenterDto) {
+	addPresenter(@Param('programId') programId: string, @Body() dto: PresenterDto) {
 		return this.festivalProgramsService.addPresenter(programId, dto)
+	}
+
+	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
+	@HttpCode(200)
+	@Auth('ADMIN')
+	@Delete(':programId/presenters')
+	removePresenter(@Param('programId') programId: string, @Body() dto: PresenterDto) {
+		return this.festivalProgramsService.removePresenter(programId, dto)
 	}
 
 	@HttpCode(200)

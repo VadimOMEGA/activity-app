@@ -15,8 +15,8 @@ model Profile {
   dojoMentor        DojoMentor?
   dojoTutor         DojoTutor?
   dojoNinja         DojoNinja?
-  festivalVolunteer FestivalVolunteer?
-  festivalGuest     FestivalGuest?
+  festivalVolunteer FestivalVolunteer[]
+  festivalGuest     FestivalGuest[]
   festivalTickets   FestivalTicket[]
 
   @@map("profiles")

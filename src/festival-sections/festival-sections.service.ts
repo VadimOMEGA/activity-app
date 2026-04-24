@@ -7,7 +7,11 @@ import { UpdateFestivalSectionDto } from './dto/update-festival-section.dto'
 export class FestivalSectionsService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	getAllByEditionId(editionId: string) {
+	async getAllByEditionId(editionId: string) {
+		const edition = await this.prisma.festivalEdition.findUnique({ where: { id: editionId } })
+
+		if (!edition) throw new NotFoundException('Festival edition not found')
+
 		return this.prisma.festivalSection.findMany({
 			where: { editionId: editionId },
 			include: { festivalActivities: true }

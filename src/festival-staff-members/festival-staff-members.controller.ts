@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post } from '@nestjs/common'
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	HttpCode,
+	Param,
+	Post,
+	UsePipes,
+	ValidationPipe
+} from '@nestjs/common'
 import { FestivalStaffMembersService } from './festival-staff-members.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { StaffMemberDto } from './dto/staff-member.dto'
@@ -14,13 +24,15 @@ export class FestivalStaffMembersController {
 		return this.festivalStaffMembersService.getAllByEditionId(editionId)
 	}
 
-	@HttpCode(200)
+	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
+	@HttpCode(201)
 	@Auth('ADMIN')
 	@Post()
 	async create(@Body() dto: StaffMemberDto) {
 		return this.festivalStaffMembersService.create(dto)
 	}
 
+	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
 	@HttpCode(200)
 	@Auth('ADMIN')
 	@Delete()

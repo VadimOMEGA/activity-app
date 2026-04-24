@@ -8,7 +8,8 @@ import {
 	Delete,
 	HttpCode,
 	UsePipes,
-	ValidationPipe
+	ValidationPipe,
+	Put
 } from '@nestjs/common'
 import { FestivalEditionsGalleryPhotosService } from './festival-editions-gallery-photos.service'
 import {
@@ -32,7 +33,7 @@ export class FestivalEditionsGalleryPhotosController {
 	}
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post('edition/:editionId/upload-intent')
 	@Auth('ADMIN')
 	createWithUploadIntent(
@@ -42,7 +43,7 @@ export class FestivalEditionsGalleryPhotosController {
 		return this.festivalEditionsGalleryPhotosService.createWithUploadIntent(editionId, dto)
 	}
 
-	@HttpCode(200)
+	@HttpCode(201)
 	@Post(':id/confirm-upload')
 	@Auth('ADMIN')
 	confirmUploadById(@Param('id') id: string) {
@@ -59,7 +60,7 @@ export class FestivalEditionsGalleryPhotosController {
 
 	@UsePipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }))
 	@HttpCode(200)
-	@Patch(':id/caption')
+	@Put(':id/caption')
 	@Auth('ADMIN')
 	updateCaption(@Param('id') id: string, @Body() dto: UpdateGalleryPhotoCaptionDto) {
 		return this.festivalEditionsGalleryPhotosService.updateCaption(id, dto)

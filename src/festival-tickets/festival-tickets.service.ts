@@ -102,6 +102,14 @@ export class FestivalTicketsService {
 			throw new BadRequestException('This redeeming already exists for this ticket')
 		}
 
+		const ticketRedeemingsCount = await this.prisma.festivalDiscountRedeeming.count({
+			where: { ticketId: dto.ticketId }
+		})
+
+		if (ticketRedeemingsCount >= existingTicket.guestCount) {
+			throw new BadRequestException('Max redeemings per ticket reached')
+		}
+
 		return this.prisma.festivalDiscountRedeeming.create({
 			data: {
 				ticketId: dto.ticketId,

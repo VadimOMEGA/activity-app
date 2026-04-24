@@ -11,7 +11,7 @@ model FestivalVolunteer {
     editionId String          @map("edition_id")
     edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
 
-    profileId String  @unique @map("profile_id")
+    profileId String  @map("profile_id")
     profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now()) @map("created_at")
@@ -43,7 +43,7 @@ model FestivalGuest {
     editionId String          @map("edition_id")
     edition   FestivalEdition @relation(fields: [editionId], references: [id], onDelete: Cascade)
 
-    profileId String  @unique @map("profile_id")
+    profileId String  @map("profile_id")
     profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
     createdAt          DateTime            @default(now()) @map("created_at")

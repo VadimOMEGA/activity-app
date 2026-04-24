@@ -32,7 +32,8 @@ export class FestivalVolunteersController {
 	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
-	@HttpCode(200)
+	@HttpCode(201)
+	@Auth('ADMIN')
 	@Post()
 	async create(@Body() dto: FestivalVolunteerDto) {
 		return this.festivalVolunteersService.create(dto)
