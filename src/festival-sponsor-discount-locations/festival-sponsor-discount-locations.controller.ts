@@ -2,6 +2,7 @@ import {
 	Body,
 	Controller,
 	Delete,
+	Get,
 	HttpCode,
 	Param,
 	Post,
@@ -19,6 +20,13 @@ export class FestivalSponsorDiscountLocationsController {
 	constructor(
 		private readonly festivalSponsorDiscountLocationsService: FestivalSponsorDiscountLocationsService
 	) {}
+
+	@HttpCode(200)
+	@Auth('ADMIN')
+	@Get('sponsor/:sponsorId')
+	getAllBySponsorId(@Param('sponsorId') sponsorId: string) {
+		return this.festivalSponsorDiscountLocationsService.getAllBySponsorId(sponsorId)
+	}
 
 	@UsePipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }))
 	@HttpCode(201)

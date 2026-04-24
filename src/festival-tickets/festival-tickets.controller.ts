@@ -59,6 +59,13 @@ export class FestivalTicketsController {
 	}
 
 	@HttpCode(200)
+	@Delete('redeemings/:id')
+	@Auth('ADMIN')
+	removeRedeeming(@Param('id') id: string) {
+		return this.festivalTicketsService.removeRedeeming(id)
+	}
+
+	@HttpCode(200)
 	@Delete(':id')
 	@Auth('ADMIN')
 	delete(@Param('id') id: string) {

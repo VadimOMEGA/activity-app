@@ -7,6 +7,18 @@ import { UpdateDiscountLocationDto } from './dto/update-discount-location.dto'
 export class FestivalSponsorDiscountLocationsService {
 	constructor(private readonly prisma: PrismaService) {}
 
+	async getAllBySponsorId(sponsorId: string) {
+		const existingSponsor = await this.prisma.festivalSponsor.findUnique({
+			where: { id: sponsorId }
+		})
+
+		if (!existingSponsor) throw new NotFoundException('Sponsor not found')
+
+		return this.prisma.festivalSponsorDiscountLocation.findMany({
+			where: { sponsorId }
+		})
+	}
+
 	async create(dto: DiscountLocationDto) {
 		const existingSponsor = await this.prisma.festivalSponsor.findUnique({
 			where: { id: dto.sponsorId }

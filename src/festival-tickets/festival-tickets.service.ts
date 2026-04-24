@@ -118,6 +118,20 @@ export class FestivalTicketsService {
 		})
 	}
 
+	async removeRedeeming(id: string) {
+		const existingRedeeming = await this.prisma.festivalDiscountRedeeming.findUnique({
+			where: { id }
+		})
+
+		if (!existingRedeeming) {
+			throw new NotFoundException('Redeeming not found')
+		}
+
+		return this.prisma.festivalDiscountRedeeming.delete({
+			where: { id }
+		})
+	}
+
 	async update(id: string, dto: UpdateTicketGuestCountDto) {
 		const existingTicket = await this.prisma.festivalTicket.findUnique({
 			where: { id }

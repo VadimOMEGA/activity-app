@@ -1,4 +1,13 @@
-import { IsHexColor, IsInt, IsNotEmpty, IsString, Max, MaxLength, Min } from 'class-validator'
+import {
+	IsHexColor,
+	IsInt,
+	IsNotEmpty,
+	IsOptional,
+	IsString,
+	Max,
+	MaxLength,
+	Min
+} from 'class-validator'
 
 export class FestivalEditionDto {
 	@IsInt()
@@ -16,15 +25,16 @@ export class FestivalEditionDto {
 	@MaxLength(255)
 	theme!: string
 
+	@IsOptional()
 	@IsString()
-	@IsNotEmpty()
 	@MaxLength(255)
-	customLogoFile!: string
+	customLogoFile?: string
 
+	@IsOptional()
 	@IsString()
 	@IsNotEmpty()
 	@MaxLength(255)
-	heroImageFile!: string
+	heroImageFile?: string
 
 	@IsString()
 	@IsNotEmpty()
@@ -36,15 +46,15 @@ export class FestivalEditionDto {
 	@MaxLength(3000)
 	longDescription!: string
 
+	@IsOptional()
 	@IsString()
-	@IsNotEmpty()
 	@MaxLength(255)
-	secondaryImageFile!: string
+	secondaryImageFile?: string
 
+	@IsOptional()
 	@IsString()
-	@IsNotEmpty()
 	@MaxLength(255)
-	accentImageFile!: string
+	accentImageFile?: string
 
 	@IsHexColor()
 	mainColor!: string
@@ -52,10 +62,10 @@ export class FestivalEditionDto {
 	@IsHexColor()
 	accentColor!: string
 
+	@IsOptional()
 	@IsString()
-	@IsNotEmpty()
 	@MaxLength(255)
-	afterVideoFile!: string
+	afterVideoFile?: string
 
 	@IsString()
 	@IsNotEmpty()

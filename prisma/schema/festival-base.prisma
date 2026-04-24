@@ -1,18 +1,18 @@
 model FestivalEdition {
     id String @id @default(cuid())
 
-    year               Int    @unique
+    year               Int     @unique
     title              String
     theme              String
-    customLogoFile     String @map("custom_logo_file")
-    heroImageFile      String @map("hero_image_file")
-    shortDescription   String @map("short_description")
-    longDescription    String @map("long_description")
-    secondaryImageFile String @map("secondary_image_file")
-    accentImageFile    String @map("accent_image_file")
-    mainColor          String @map("main_color")
-    accentColor        String @map("accent_color")
-    afterVideoFile     String @map("after_video_file")
+    customLogoFile     String? @map("custom_logo_file")
+    heroImageFile      String? @map("hero_image_file")
+    shortDescription   String  @map("short_description")
+    longDescription    String  @map("long_description")
+    secondaryImageFile String? @map("secondary_image_file")
+    accentImageFile    String? @map("accent_image_file")
+    mainColor          String  @map("main_color")
+    accentColor        String  @map("accent_color")
+    afterVideoFile     String? @map("after_video_file")
 
     blogTagId String
     blogTag   BlogTag @relation(fields: [blogTagId], references: [id], onDelete: Restrict)
