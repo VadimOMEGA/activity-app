@@ -75,7 +75,7 @@ export class FestivalEditionsGalleryPhotosService {
 		if (!existingEdition) throw new NotFoundException('Festival edition not found')
 
 		const tempFileName = `gallery-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-		const folder = `festival-editions/${editionId}/gallery`
+		const folder = `festival-editions/${existingEdition.year}/gallery`
 
 		const upload = await this.s3Service.createUploadUrl(
 			folder,

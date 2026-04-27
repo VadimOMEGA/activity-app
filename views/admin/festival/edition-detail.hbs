@@ -1,0 +1,903 @@
+{{> head}}
+{{> edition_tabs}}
+
+{{#unless edition}}
+<div class="text-center text-secondary py-5"><i class="bi bi-exclamation-triangle display-4"></i><p class="mt-2">Edition not found</p></div>
+{{else}}
+
+<div class="row g-3">
+	<!-- Assets Card -->
+	<div class="col-md-7">
+		<div class="card bg-dark border-secondary h-100">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-image me-2 text-teal"></i>Edition Assets</span>
+			</div>
+			<div class="card-body">
+				<div class="row g-2">
+					{{#each (assetList edition)}}
+					<div class="col-12 d-flex align-items-center gap-2 py-1">
+						<span class="text-secondary" style="min-width:90px;font-size:0.8rem;">{{this.label}}:</span>
+						{{#if this.isImage}}
+							{{#if this.url}}
+							<img src="{{this.url}}" class="rounded" style="width:40px;height:40px;object-fit:cover;">
+							{{else}}
+							<span class="badge bg-secondary">None</span>
+							{{/if}}
+						{{else}}
+							{{#if this.url}}
+							<span class="badge bg-info">Uploaded</span>
+							{{else}}
+							<span class="badge bg-secondary">None</span>
+							{{/if}}
+						{{/if}}
+						{{#if ../canEdit}}
+						<button class="btn btn-outline-light btn-sm ms-auto" style="font-size:0.7rem;" onclick='replaceAsset("{{this.role}}", "{{this.label}}")'>
+							<i class="bi bi-arrow-repeat"></i> Replace
+						</button>
+						{{/if}}
+					</div>
+					{{/each}}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Stats Card -->
+	<div class="col-md-5">
+		<div class="card bg-dark border-secondary h-100">
+			<div class="card-header"><i class="bi bi-bar-chart me-2 text-teal"></i>Quick Stats</div>
+			<div class="card-body p-0">
+				<table class="table table-dark table-sm mb-0" style="font-size:0.85rem;">
+					<tbody>
+						<tr><td class="ps-3 py-2">Sections</td><td class="text-end pe-3"><span class="badge bg-info">{{counts.sections}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Activities</td><td class="text-end pe-3"><span class="badge bg-info">{{counts.activities}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Locations</td><td class="text-end pe-3"><span class="badge bg-info">{{counts.locations}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Volunteers</td><td class="text-end pe-3"><span class="badge bg-info">{{counts.volunteers}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Staff</td><td class="text-end pe-3"><span class="badge bg-info">{{counts.staff}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Guests</td><td class="text-end pe-3"><span class="badge bg-info">{{counts.guests}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Sponsors</td><td class="text-end pe-3"><span class="badge bg-warning text-dark">{{counts.sponsors}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Tickets</td><td class="text-end pe-3"><span class="badge bg-warning text-dark">{{counts.tickets}}</span></td></tr>
+						<tr><td class="ps-3 py-2">Gallery</td><td class="text-end pe-3"><span class="badge bg-success">{{counts.gallery}}</span></td></tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Gallery Card -->
+	<div class="col-12">
+		<div class="card bg-dark border-secondary">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-images me-2 text-teal"></i>Gallery ({{counts.gallery}})</span>
+				{{#if canEdit}}
+				<button class="btn btn-teal btn-sm" onclick="openGalleryModal()">Manage <i class="bi bi-arrow-right ms-1"></i></button>
+				{{/if}}
+			</div>
+			<div class="card-body">
+				{{#if edition.festivalEditionGalleryPhotos.length}}
+				<div class="d-flex gap-2 flex-wrap">
+					{{#each edition.festivalEditionGalleryPhotos}}
+					{{#if (lt @index 8)}}
+					<img src="{{this.photoFile}}" class="rounded gallery-thumb-sm" style="width:80px;height:80px;object-fit:cover;cursor:pointer;" title="{{this.caption}}">
+					{{/if}}
+					{{/each}}
+					{{#if (gt counts.gallery 8)}}
+					<div class="d-flex align-items-center justify-content-center rounded" style="width:80px;height:80px;background:var(--ai3-dark-surface);color:var(--ai3-teal-light);font-size:0.85rem;">
+						+{{subtract counts.gallery 8}} more
+					</div>
+					{{/if}}
+				</div>
+				{{else}}
+				<p class="text-secondary mb-0"><small>No photos yet</small></p>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+
+	<!-- Locations Card -->
+	<div class="col-md-6">
+		<div class="card bg-dark border-secondary h-100">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-geo-alt me-2 text-teal"></i>Locations ({{counts.locations}})</span>
+				{{#if canEdit}}
+				<button class="btn btn-teal btn-sm" onclick="openAddLocationModal()"><i class="bi bi-plus-lg"></i></button>
+				{{/if}}
+			</div>
+			<div class="card-body p-0">
+				{{#if edition.festivalLocations.length}}
+				<table class="table table-dark table-sm mb-0" style="font-size:0.85rem;">
+					<thead><tr><th class="ps-3">Name</th><th>Coordinator</th>{{#if canEdit}}<th class="text-end pe-3">Actions</th>{{/if}}</tr></thead>
+					<tbody>
+						{{#each edition.festivalLocations}}
+						<tr>
+							<td class="ps-3">{{this.name}}</td>
+							<td>{{#if this.coordinator}}{{this.coordinator.profile.name}}{{else}}—{{/if}}</td>
+							{{#if ../canEdit}}
+							<td class="text-end pe-3">
+								<button class="btn btn-outline-light btn-sm me-1" onclick='editLocation({{{json this}}})' title="Edit"><i class="bi bi-pencil"></i></button>
+								<button class="btn btn-outline-danger btn-sm" onclick='deleteLocation("{{this.id}}", "{{this.name}}")' title="Delete"><i class="bi bi-trash"></i></button>
+							</td>
+							{{/if}}
+						</tr>
+						{{/each}}
+					</tbody>
+				</table>
+				{{else}}
+				<p class="text-secondary mb-0 p-3"><small>No locations yet</small></p>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+
+	<!-- People Card -->
+	<div class="col-md-6">
+		<div class="card bg-dark border-secondary h-100">
+			<div class="card-header"><i class="bi bi-people me-2 text-teal"></i>People</div>
+			<div class="card-body">
+				<div class="d-flex flex-column gap-2">
+					<div class="d-flex justify-content-between align-items-center">
+						<span>Volunteers</span>
+						<div>
+							<span class="badge bg-info me-2">{{counts.volunteers}}</span>
+							{{#if canEdit}}<button class="btn btn-outline-light btn-sm" onclick="openVolunteersModal()">Manage</button>{{/if}}
+						</div>
+					</div>
+					<div class="d-flex justify-content-between align-items-center">
+						<span>Staff</span>
+						<div>
+							<span class="badge bg-info me-2">{{counts.staff}}</span>
+							{{#if canEdit}}<button class="btn btn-outline-light btn-sm" onclick="openStaffModal()">Manage</button>{{/if}}
+						</div>
+					</div>
+					<div class="d-flex justify-content-between align-items-center">
+						<span>Guests</span>
+						<div>
+							<span class="badge bg-info me-2">{{counts.guests}}</span>
+							{{#if canEdit}}<button class="btn btn-outline-light btn-sm" onclick="openGuestsModal()">Manage</button>{{/if}}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Sections & Activities Card -->
+	<div class="col-12">
+		<div class="card bg-dark border-secondary">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span><i class="bi bi-collection me-2 text-teal"></i>Sections & Activities ({{counts.sections}} sections, {{counts.activities}} activities)</span>
+				{{#if canEdit}}
+				<button class="btn btn-teal btn-sm" onclick="openAddSectionModal()"><i class="bi bi-plus-lg me-1"></i>Add Section</button>
+				{{/if}}
+			</div>
+			<div class="card-body p-0">
+				{{#if edition.festivalSections.length}}
+				<div class="accordion accordion-flush" id="sectionsAccordion">
+					{{#each edition.festivalSections}}
+					<div class="accordion-item bg-transparent">
+						<h2 class="accordion-header">
+							<button class="accordion-button collapsed bg-transparent text-light py-2 px-3" type="button"
+								data-bs-toggle="collapse" data-bs-target="#section-{{this.id}}">
+								<strong>{{this.name}}</strong>
+								<span class="badge bg-secondary ms-2">{{this.festivalActivities.length}} activities</span>
+							</button>
+						</h2>
+						<div id="section-{{this.id}}" class="accordion-collapse collapse" data-bs-parent="#sectionsAccordion">
+							<div class="accordion-body py-2 px-3">
+								<div class="d-flex justify-content-between mb-2">
+									{{#if ../canEdit}}
+									<div>
+										<button class="btn btn-outline-light btn-sm me-1" onclick='editSection("{{this.id}}", "{{this.name}}")' title="Edit Section"><i class="bi bi-pencil me-1"></i>Edit</button>
+										<button class="btn btn-outline-danger btn-sm" onclick='deleteSection("{{this.id}}", "{{this.name}}")' title="Delete Section"><i class="bi bi-trash me-1"></i>Delete</button>
+									</div>
+									<button class="btn btn-teal btn-sm" onclick='openAddActivityModal("{{this.id}}")'><i class="bi bi-plus-lg me-1"></i>Add Activity</button>
+									{{/if}}
+								</div>
+								{{#if this.festivalActivities.length}}
+								<table class="table table-dark table-sm mb-0" style="font-size:0.8rem;">
+									<thead><tr><th>Title</th><th>Type</th><th>Audience</th>{{#if ../canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+									<tbody>
+										{{#each this.festivalActivities}}
+										<tr>
+											<td>{{this.title}}</td>
+											<td><span class="badge bg-secondary">{{this.activityType}}</span></td>
+											<td><span class="badge bg-info">{{this.audience}}</span></td>
+											{{#if ../../canEdit}}
+											<td class="text-end">
+												<button class="btn btn-outline-light btn-sm me-1" onclick='editActivity({{{json this}}})' title="Edit"><i class="bi bi-pencil"></i></button>
+												<button class="btn btn-outline-danger btn-sm" onclick='deleteActivity("{{this.id}}", "{{this.title}}")' title="Delete"><i class="bi bi-trash"></i></button>
+											</td>
+											{{/if}}
+										</tr>
+										{{/each}}
+									</tbody>
+								</table>
+								{{else}}
+								<p class="text-secondary mb-0"><small>No activities in this section</small></p>
+								{{/if}}
+							</div>
+						</div>
+					</div>
+					{{/each}}
+				</div>
+				{{else}}
+				<p class="text-secondary mb-0 p-3"><small>No sections yet</small></p>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Location Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="locationModalTitle">Add Location</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="locId">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="locName"></div>
+			<div class="mb-3"><label class="form-label">Address</label><input type="text" class="form-control" id="locAddress"></div>
+			<div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="locDesc" rows="3"></textarea></div>
+			<div class="mb-3">
+				<label class="form-label">Coordinator (Volunteer)</label>
+				<select class="form-select" id="locCoordinator">
+					<option value="">None</option>
+					{{#each edition.festivalVolunteers}}
+					<option value="{{this.id}}">{{this.profile.name}}</option>
+					{{/each}}
+				</select>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveLocation()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Section Modal -->
+<div class="modal fade" id="sectionModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="sectionModalTitle">Add Section</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="secId">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="secName"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveSection()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Activity Modal -->
+<div class="modal fade" id="activityModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="activityModalTitle">Add Activity</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="actId">
+			<input type="hidden" id="actSectionId">
+			<div class="mb-3"><label class="form-label">Title</label><input type="text" class="form-control" id="actTitle"></div>
+			<div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="actDesc" rows="2"></textarea></div>
+			<div class="row g-3">
+				<div class="col-md-6">
+					<label class="form-label">Type</label>
+					<select class="form-select" id="actType">
+						<option value="TALK_PANEL">Talk / Panel</option>
+						<option value="TALK_KEYNOTE">Keynote</option>
+						<option value="INSTALLATION">Installation</option>
+						<option value="WORKSHOP">Workshop</option>
+						<option value="SOCIAL_TOUR">Tour</option>
+						<option value="SOCIAL_DINNER">Dinner</option>
+						<option value="SOCIAL_CONCERT">Concert</option>
+						<option value="STAFF_ROUNDUP">Staff Roundup</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">Audience</label>
+					<select class="form-select" id="actAudience">
+						<option value="PUBLIC">Public</option>
+						<option value="GUESTS">Guests</option>
+						<option value="STAFF">Staff</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveActivity()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Asset Replace (hidden file input) -->
+<input type="file" id="assetFileInput" style="display:none" accept="image/*,video/*">
+
+<script>
+const editionId = '{{edition.id}}'
+const editionYear = {{edition.year}}
+
+// ---- Asset Replace ----
+let pendingAssetRole = null
+document.getElementById('assetFileInput').addEventListener('change', async function() {
+	const file = this.files[0]
+	if (!file || !pendingAssetRole) return
+	
+	const btns = document.querySelectorAll('button[onclick^="replaceAsset"]')
+	btns.forEach(b => b.disabled = true)
+
+	try {
+		showToast('Uploading...')
+		const intents = await apiCall('/api/festival-editions/upload-intents', 'POST', {
+			year: editionYear,
+			files: [{ role: pendingAssetRole, originalFileName: file.name, contentType: file.type }]
+		})
+		const intent = intents[0]
+		await fetch(intent.uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
+		const fieldMap = { logo: 'customLogoFile', hero: 'heroImageFile', secondary: 'secondaryImageFile', accent: 'accentImageFile', video: 'afterVideoFile' }
+		await apiCall(`/api/festival-editions/${editionId}`, 'PUT', { [fieldMap[pendingAssetRole]]: intent.publicUrl })
+		showToast('Asset replaced')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { 
+		showToast(e.message, 'error') 
+		btns.forEach(b => b.disabled = false)
+	}
+	this.value = ''
+	pendingAssetRole = null
+})
+
+function replaceAsset(role, label) {
+	pendingAssetRole = role
+	const inp = document.getElementById('assetFileInput')
+	inp.accept = role === 'video' ? 'video/*' : 'image/*'
+	inp.click()
+}
+
+// ---- Locations ----
+function openAddLocationModal() {
+	document.getElementById('locId').value = ''
+	document.getElementById('locName').value = ''
+	document.getElementById('locAddress').value = ''
+	document.getElementById('locDesc').value = ''
+	document.getElementById('locCoordinator').value = ''
+	document.getElementById('locationModalTitle').textContent = 'Add Location'
+	new bootstrap.Modal(document.getElementById('locationModal')).show()
+}
+
+function editLocation(loc) {
+	document.getElementById('locId').value = loc.id
+	document.getElementById('locName').value = loc.name
+	document.getElementById('locAddress').value = loc.address || ''
+	document.getElementById('locDesc').value = loc.description || ''
+	document.getElementById('locCoordinator').value = loc.coordinatorId || ''
+	document.getElementById('locationModalTitle').textContent = 'Edit Location'
+	new bootstrap.Modal(document.getElementById('locationModal')).show()
+}
+
+async function saveLocation() {
+	const id = document.getElementById('locId').value
+	const name = document.getElementById('locName').value.trim()
+	const address = document.getElementById('locAddress').value.trim()
+	const description = document.getElementById('locDesc').value.trim()
+	const coordinatorId = document.getElementById('locCoordinator').value || null
+	if (!name) return showToast('Name is required', 'error')
+	try {
+		if (id) {
+			await apiCall(`/api/festival-locations/${id}`, 'PUT', { name, address, description, coordinatorId })
+		} else {
+			await apiCall('/api/festival-locations', 'POST', { editionId, name, address, description, coordinatorId })
+		}
+		showToast(id ? 'Location updated' : 'Location added')
+		bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteLocation(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-locations/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Sections ----
+function openAddSectionModal() {
+	document.getElementById('secId').value = ''
+	document.getElementById('secName').value = ''
+	document.getElementById('sectionModalTitle').textContent = 'Add Section'
+	new bootstrap.Modal(document.getElementById('sectionModal')).show()
+}
+
+function editSection(id, name) {
+	document.getElementById('secId').value = id
+	document.getElementById('secName').value = name
+	document.getElementById('sectionModalTitle').textContent = 'Edit Section'
+	new bootstrap.Modal(document.getElementById('sectionModal')).show()
+}
+
+async function saveSection() {
+	const id = document.getElementById('secId').value
+	const name = document.getElementById('secName').value.trim()
+	if (!name) return showToast('Name is required', 'error')
+	try {
+		if (id) {
+			await apiCall(`/api/festival-sections/${id}`, 'PUT', { name })
+		} else {
+			await apiCall('/api/festival-sections', 'POST', { editionId, name })
+		}
+		showToast(id ? 'Section updated' : 'Section added')
+		bootstrap.Modal.getInstance(document.getElementById('sectionModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteSection(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-sections/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Activities ----
+function openAddActivityModal(sectionId) {
+	document.getElementById('actId').value = ''
+	document.getElementById('actSectionId').value = sectionId
+	document.getElementById('actTitle').value = ''
+	document.getElementById('actDesc').value = ''
+	document.getElementById('actType').value = 'TALK_PANEL'
+	document.getElementById('actAudience').value = 'PUBLIC'
+	document.getElementById('activityModalTitle').textContent = 'Add Activity'
+	new bootstrap.Modal(document.getElementById('activityModal')).show()
+}
+
+function editActivity(act) {
+	document.getElementById('actId').value = act.id
+	document.getElementById('actSectionId').value = act.sectionId
+	document.getElementById('actTitle').value = act.title
+	document.getElementById('actDesc').value = act.description
+	document.getElementById('actType').value = act.activityType
+	document.getElementById('actAudience').value = act.audience
+	document.getElementById('activityModalTitle').textContent = 'Edit Activity'
+	new bootstrap.Modal(document.getElementById('activityModal')).show()
+}
+
+async function saveActivity() {
+	const id = document.getElementById('actId').value
+	const sectionId = document.getElementById('actSectionId').value
+	const title = document.getElementById('actTitle').value.trim()
+	const description = document.getElementById('actDesc').value.trim()
+	const activityType = document.getElementById('actType').value
+	const audience = document.getElementById('actAudience').value
+	if (!title || !description) return showToast('Title and description are required', 'error')
+	try {
+		if (id) {
+			await apiCall(`/api/festival-activities/${id}`, 'PUT', { sectionId, title, description, activityType, audience })
+		} else {
+			await apiCall('/api/festival-activities', 'POST', { sectionId, title, description, activityType, audience })
+		}
+		showToast(id ? 'Activity updated' : 'Activity added')
+		bootstrap.Modal.getInstance(document.getElementById('activityModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteActivity(id, title) {
+	confirmDelete(title, async () => { await apiCall(`/api/festival-activities/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Volunteers ----
+const allMembers = {{{membersJson}}}
+
+function openVolunteersModal() { new bootstrap.Modal(document.getElementById('volunteersModal')).show() }
+
+function openAddVolunteerModal() {
+	document.getElementById('volName').value = ''
+	document.getElementById('volEmail').value = ''
+	document.getElementById('volPhone').value = ''
+	document.getElementById('volBirthDate').value = ''
+	new bootstrap.Modal(document.getElementById('addVolunteerModal')).show()
+}
+
+async function addVolunteer() {
+	const name = document.getElementById('volName').value.trim()
+	const email = document.getElementById('volEmail').value.trim()
+	const phone = document.getElementById('volPhone').value.trim()
+	const birthDate = document.getElementById('volBirthDate').value
+	if (!name || !email || !phone || !birthDate) return showToast('All fields required', 'error')
+	try {
+		await apiCall('/api/festival-volunteers', 'POST', { editionId, name, email, phone, birthDate })
+		showToast('Volunteer added')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteVolunteer(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-volunteers/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Staff ----
+function openStaffModal() { new bootstrap.Modal(document.getElementById('staffModal')).show() }
+
+function openAddStaffModal() {
+	const sel = document.getElementById('staffMemberId')
+	sel.innerHTML = '<option value="">Select member...</option>' + allMembers.map(m =>
+		`<option value="${m.id}">${escapeHtml(m.profile.name)} (${escapeHtml(m.profile.email)})</option>`
+	).join('')
+	new bootstrap.Modal(document.getElementById('addStaffModal')).show()
+}
+
+async function addStaff() {
+	const memberId = document.getElementById('staffMemberId').value
+	if (!memberId) return showToast('Select a member', 'error')
+	try {
+		await apiCall('/api/festival-staff-members', 'POST', { editionId, memberId })
+		showToast('Staff member added')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteStaff(memberId, name) {
+	confirmDelete(name, async () => { await apiCall('/api/festival-staff-members', 'DELETE', { editionId, memberId }); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Guests ----
+function openGuestsModal() { new bootstrap.Modal(document.getElementById('guestsModal')).show() }
+
+function openAddGuestModal() {
+	document.getElementById('guestName').value = ''
+	document.getElementById('guestEmail').value = ''
+	document.getElementById('guestPhone').value = ''
+	document.getElementById('guestBirthDate').value = ''
+	document.querySelectorAll('.guest-role-cb').forEach(cb => cb.checked = false)
+	new bootstrap.Modal(document.getElementById('addGuestModal')).show()
+}
+
+async function addGuest() {
+	const name = document.getElementById('guestName').value.trim()
+	const email = document.getElementById('guestEmail').value.trim()
+	const phone = document.getElementById('guestPhone').value.trim()
+	const birthDate = document.getElementById('guestBirthDate').value
+	const roles = [...document.querySelectorAll('.guest-role-cb:checked')].map(cb => cb.value)
+	if (!name || !email || !phone || !birthDate) return showToast('All fields required', 'error')
+	if (roles.length === 0) return showToast('Select at least one role', 'error')
+	try {
+		await apiCall('/api/festival-guests', 'POST', { editionId, name, email, phone, birthDate, roles })
+		showToast('Guest added')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+async function updateGuestRoles(guestId) {
+	const roles = [...document.querySelectorAll(`.edit-role-cb-${guestId}:checked`)].map(cb => cb.value)
+	if (roles.length === 0) return showToast('Select at least one role', 'error')
+	try {
+		await apiCall(`/api/festival-guests/${guestId}/roles`, 'PATCH', { roles })
+		showToast('Roles updated')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteGuest(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-guests/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Gallery ----
+let galleryPhotos = []
+let gallerySortable = null
+let galleryLightbox = null
+let galleryModified = false
+
+async function openGalleryModal() {
+	const modalEl = document.getElementById('galleryModal')
+	const modal = new bootstrap.Modal(modalEl)
+
+	// Attach reload-on-close listener (once)
+	if (!modalEl.dataset.listenerAttached) {
+		modalEl.addEventListener('hidden.bs.modal', function () {
+			if (galleryModified) reloadPage()
+		})
+		modalEl.dataset.listenerAttached = 'true'
+	}
+
+	galleryModified = false
+	modal.show()
+	await loadGalleryPhotos()
+}
+
+async function loadGalleryPhotos() {
+	try {
+		galleryPhotos = await apiCall(`/api/festival-editions-gallery-photos/edition/${editionId}`)
+		renderGalleryGrid()
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function renderGalleryGrid() {
+	const container = document.getElementById('galleryGrid')
+	if (!galleryPhotos.length) {
+		container.innerHTML = '<p class="text-secondary text-center py-4"><small>No photos yet. Upload some below.</small></p>'
+		if (gallerySortable) { gallerySortable.destroy(); gallerySortable = null }
+		if (galleryLightbox) { galleryLightbox.destroy(); galleryLightbox = null }
+		return
+	}
+
+	container.innerHTML = galleryPhotos.map((p, i) => `
+		<div class="gallery-item" data-id="${p.id}" data-index="${i}">
+			<a href="${p.photoFile}" class="glightbox" data-gallery="edition-gallery" data-description="${escapeHtml(p.caption || '')}">
+				<img src="${p.photoFile}" class="gallery-thumb" alt="${escapeHtml(p.caption || '')}">
+			</a>
+			<div class="gallery-caption-row mt-1">
+				<input type="text" class="form-control form-control-md gallery-caption-input" value="${escapeHtml(p.caption || '')}" placeholder="Caption..." data-id="${p.id}">
+				<button class="btn btn-outline-danger btn-sm ms-1" onclick="deleteGalleryPhoto('${p.id}')" title="Delete"><i class="bi bi-trash"></i></button>
+			</div>
+		</div>
+	`).join('')
+
+	// Init SortableJS
+	if (gallerySortable) gallerySortable.destroy()
+	gallerySortable = Sortable.create(container, {
+		animation: 150,
+		ghostClass: 'gallery-drag-ghost',
+		handle: '.gallery-thumb',
+		onEnd: async function() {
+			const items = [...container.children].map((el, i) => ({ id: el.dataset.id, sortOrder: i }))
+			try {
+				await apiCall('/api/festival-editions-gallery-photos/reorder', 'PATCH', { items })
+				galleryPhotos = items.map(item => {
+					const photo = galleryPhotos.find(p => p.id === item.id)
+					return { ...photo, sortOrder: item.sortOrder }
+				})
+				galleryModified = true
+				showToast('Gallery reordered')
+			} catch(e) { showToast(e.message, 'error') }
+		}
+	})
+
+	// Init GLightbox
+	if (galleryLightbox) galleryLightbox.destroy()
+	galleryLightbox = GLightbox({
+		selector: '.glightbox',
+		touchNavigation: true,
+		loop: true,
+		closeOnOutsideClick: true
+	})
+
+	// Caption blur handlers
+	container.querySelectorAll('.gallery-caption-input').forEach(input => {
+		const originalVal = input.value
+		input.addEventListener('blur', async function() {
+			const newCaption = this.value.trim()
+			if (newCaption === originalVal) return
+			try {
+				await apiCall(`/api/festival-editions-gallery-photos/${this.dataset.id}/caption`, 'PUT', { caption: newCaption })
+				galleryModified = true
+				showToast('Caption updated')
+			} catch(e) { 
+				showToast(e.message, 'error')
+				this.value = originalVal
+			}
+		})
+	})
+}
+
+async function deleteGalleryPhoto(id) {
+	confirmDelete('this photo', async () => {
+		try {
+			await apiCall(`/api/festival-editions-gallery-photos/${id}`, 'DELETE')
+			galleryPhotos = galleryPhotos.filter(p => p.id !== id)
+			galleryModified = true
+			renderGalleryGrid()
+			showToast('Photo deleted')
+		} catch(e) { showToast(e.message, 'error') }
+	})
+}
+
+async function uploadGalleryPhotos() {
+	const fileInput = document.getElementById('galleryFileInput')
+	const files = [...fileInput.files]
+	if (!files.length) return
+
+	const uploadBtn = document.getElementById('btnUploadGallery')
+	uploadBtn.disabled = true
+	fileInput.disabled = true
+	showToast(`Uploading ${files.length} photo(s)...`)
+
+	let successCount = 0
+	const startOrder = galleryPhotos.length
+
+	for (let i = 0; i < files.length; i++) {
+		const file = files[i]
+		try {
+			const result = await apiCall(`/api/festival-editions-gallery-photos/edition/${editionId}/upload-intent`, 'POST', {
+				originalFileName: file.name,
+				contentType: file.type,
+				caption: '',
+				sortOrder: startOrder + i
+			})
+			await fetch(result.upload.uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
+			await apiCall(`/api/festival-editions-gallery-photos/${result.photo.id}/confirm-upload`, 'POST')
+			successCount++
+		} catch(e) {
+			showToast(`Failed to upload ${file.name}: ${e.message}`, 'error')
+		}
+	}
+
+	fileInput.value = ''
+	fileInput.disabled = false
+	uploadBtn.disabled = false
+
+	if (successCount > 0) {
+		galleryModified = true
+		showToast(`${successCount} photo(s) uploaded`)
+		await loadGalleryPhotos()
+	}
+}
+</script>
+
+<!-- Volunteers Modal -->
+<div class="modal fade" id="volunteersModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg"><div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title">Volunteers</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+		</div>
+		<div class="modal-body">
+			<button class="btn btn-teal btn-sm mb-3" onclick="openAddVolunteerModal()"><i class="bi bi-plus-lg me-1"></i>Add Volunteer</button>
+			{{#if edition.festivalVolunteers.length}}
+			<table class="table table-dark table-sm" style="font-size:0.85rem;">
+				<thead><tr><th>Name</th><th>Email</th><th>Phone</th><th class="text-end">Actions</th></tr></thead>
+				<tbody>
+					{{#each edition.festivalVolunteers}}
+					<tr>
+						<td>{{this.profile.name}}</td><td>{{this.profile.email}}</td><td>{{this.profile.phone}}</td>
+						<td class="text-end text-nowrap">
+							<button class="btn btn-outline-light btn-sm me-1" title="Edit Profile" onclick='openProfileModal("{{this.profile.id}}", "{{this.profile.name}}", "{{this.profile.email}}", "{{this.profile.phone}}", "{{this.profile.birthDate}}")'><i class="bi bi-person"></i></button>
+							<button class="btn btn-outline-danger btn-sm" onclick='deleteVolunteer("{{this.id}}", "{{this.profile.name}}")'><i class="bi bi-trash"></i></button>
+						</td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{else}}<p class="text-secondary">No volunteers yet</p>{{/if}}
+		</div>
+	</div></div>
+</div>
+
+<!-- Add Volunteer Modal -->
+<div class="modal fade" id="addVolunteerModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Add Volunteer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="volName"></div>
+			<div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="volEmail"></div>
+			<div class="mb-3"><label class="form-label">Phone</label><input type="tel" class="form-control" id="volPhone" placeholder="+40..."></div>
+			<div class="mb-3"><label class="form-label">Birth Date</label><input type="date" class="form-control" id="volBirthDate"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="addVolunteer()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Staff Modal -->
+<div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Staff Members</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<button class="btn btn-teal btn-sm mb-3" onclick="openAddStaffModal()"><i class="bi bi-plus-lg me-1"></i>Add Staff</button>
+			{{#if edition.festivalStaffMembers.length}}
+			<table class="table table-dark table-sm" style="font-size:0.85rem;">
+				<thead><tr><th>Name</th><th>Email</th><th class="text-end">Actions</th></tr></thead>
+				<tbody>
+					{{#each edition.festivalStaffMembers}}
+					<tr>
+						<td>{{this.member.profile.name}}</td><td>{{this.member.profile.email}}</td>
+						<td class="text-end"><button class="btn btn-outline-danger btn-sm" onclick='deleteStaff("{{this.memberId}}", "{{this.member.profile.name}}")'><i class="bi bi-trash"></i></button></td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{else}}<p class="text-secondary">No staff yet</p>{{/if}}
+		</div>
+	</div></div>
+</div>
+
+<!-- Add Staff Modal -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Add Staff Member</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="mb-3"><label class="form-label">Member</label><select class="form-select" id="staffMemberId"><option value="">Select member...</option></select></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="addStaff()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Guests Modal -->
+<div class="modal fade" id="guestsModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Guests</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<button class="btn btn-teal btn-sm mb-3" onclick="openAddGuestModal()"><i class="bi bi-plus-lg me-1"></i>Add Guest</button>
+			{{#if edition.festivalGuests.length}}
+			<table class="table table-dark table-sm" style="font-size:0.85rem;">
+				<thead><tr><th>Name</th><th>Email</th><th>Roles</th><th class="text-end">Actions</th></tr></thead>
+				<tbody>
+					{{#each edition.festivalGuests}}
+					<tr>
+						<td>{{this.profile.name}}</td><td>{{this.profile.email}}</td>
+						<td>
+							{{#each this.festivalGuestRoles}}
+							<span class="badge {{guestRoleBadge this.role}} me-1">{{this.role}}</span>
+							{{/each}}
+						</td>
+						<td class="text-end text-nowrap">
+							<button class="btn btn-outline-light btn-sm me-1" title="Edit Profile" onclick='openProfileModal("{{this.profile.id}}", "{{this.profile.name}}", "{{this.profile.email}}", "{{this.profile.phone}}", "{{this.profile.birthDate}}")'><i class="bi bi-person"></i></button>
+							<button class="btn btn-outline-light btn-sm me-1" data-bs-toggle="collapse" data-bs-target="#editRoles-{{this.id}}" title="Edit Roles"><i class="bi bi-shield"></i></button>
+							<button class="btn btn-outline-danger btn-sm" onclick='deleteGuest("{{this.id}}", "{{this.profile.name}}")'><i class="bi bi-trash"></i></button>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4" class="p-0 border-0">
+							<div class="collapse" id="editRoles-{{this.id}}">
+								<div class="py-2 px-0 d-flex gap-2 flex-wrap align-items-center">
+									{{#each ../guestRoles}}
+									<div class="form-check form-check-inline">
+										<input class="form-check-input edit-role-cb-{{../this.id}}" type="checkbox" value="{{this}}" id="er-{{../this.id}}-{{this}}">
+										<label class="form-check-label" for="er-{{../this.id}}-{{this}}" style="font-size:0.8rem;">{{this}}</label>
+									</div>
+									{{/each}}
+									<button class="btn btn-teal btn-sm ms-auto" onclick='updateGuestRoles("{{this.id}}")'>Update</button>
+								</div>
+							</div>
+						</td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			<script>
+			// Pre-check existing roles
+			{{#each edition.festivalGuests}}
+			{{#each this.festivalGuestRoles}}
+			document.querySelector('.edit-role-cb-{{../this.id}}[value="{{this.role}}"]')?.setAttribute('checked','')
+			{{/each}}
+			{{/each}}
+			</script>
+			{{else}}<p class="text-secondary">No guests yet</p>{{/if}}
+		</div>
+	</div></div>
+</div>
+
+<!-- Add Guest Modal -->
+<div class="modal fade" id="addGuestModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Add Guest</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="guestName"></div>
+			<div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="guestEmail"></div>
+			<div class="mb-3"><label class="form-label">Phone</label><input type="tel" class="form-control" id="guestPhone" placeholder="+40..."></div>
+			<div class="mb-3"><label class="form-label">Birth Date</label><input type="date" class="form-control" id="guestBirthDate"></div>
+			<div class="mb-3">
+				<label class="form-label">Roles</label>
+				<div class="d-flex gap-2 flex-wrap">
+					{{#each guestRoles}}
+					<div class="form-check"><input class="form-check-input guest-role-cb" type="checkbox" value="{{this}}" id="gr-{{this}}"><label class="form-check-label" for="gr-{{this}}" style="font-size:0.85rem;">{{this}}</label></div>
+					{{/each}}
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="addGuest()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Gallery Modal -->
+<div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl"><div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title"><i class="bi bi-images me-2 text-teal"></i>Gallery Management</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+		</div>
+		<div class="modal-body">
+			<div id="galleryGrid" class="gallery-grid mb-3"></div>
+			{{#if canEdit}}
+			<div class="border-top border-secondary pt-3">
+				<label class="form-label text-secondary"><small>Add Photos</small></label>
+				<div class="d-flex gap-2 align-items-center">
+					<input type="file" class="form-control form-control-sm" id="galleryFileInput" accept="image/*" multiple style="max-width:400px;">
+					<button class="btn btn-teal btn-sm" id="btnUploadGallery" onclick="uploadGalleryPhotos()"><i class="bi bi-cloud-upload me-1"></i>Upload</button>
+				</div>
+				<small class="text-secondary mt-1 d-block">Drag photos to reorder. Click to zoom. Edit captions inline.</small>
+			</div>
+			{{/if}}
+		</div>
+	</div></div>
+</div>
+
+<!-- SortableJS (gallery reordering) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<!-- GLightbox (gallery zoom) -->
+<link href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/js/glightbox.min.js"></script>
+
+{{/unless}}
+{{> foot}}

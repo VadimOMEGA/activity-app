@@ -1,0 +1,257 @@
+{{> head}}
+{{> edition_tabs}}
+
+{{#unless edition}}
+<div class="text-center text-secondary py-5"><i class="bi bi-exclamation-triangle display-4"></i><p class="mt-2">Edition not found</p></div>
+{{else}}
+
+<div class="row mb-3 align-items-center">
+	<div class="col-md-4">
+		<h5 class="mb-0">Tickets ({{tickets.length}})</h5>
+	</div>
+	<div class="col-md-4">
+		<div class="input-group input-group-sm">
+			<span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
+			<input type="text" class="form-control bg-dark border-secondary text-light" id="ticketSearch" placeholder="Search by ticket code or name..." onkeyup="filterTickets()">
+		</div>
+	</div>
+	<div class="col-md-4 text-end">
+		{{#if canEdit}}
+		<button class="btn btn-teal btn-sm" onclick="openAddTicketModal()"><i class="bi bi-plus-lg me-1"></i>New Ticket</button>
+		{{/if}}
+	</div>
+</div>
+
+{{#if tickets.length}}
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover" id="ticketsTable" style="font-size:0.85rem;">
+		<thead><tr><th>Code</th><th>Holder</th><th>Email</th><th>Guests</th><th>Redeemings</th><th>Created</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each tickets}}
+			<tr class="ticket-row" data-code="{{this.code}}" data-name="{{toLowerCase this.holderProfile.name}}">
+				<td><span class="text-secondary font-monospace" style="font-size:0.75rem;">{{this.code}}</span></td>
+				<td><strong>{{this.holderProfile.name}}</strong></td>
+				<td>{{this.holderProfile.email}}</td>
+				<td><span class="badge bg-info">{{this.guestCount}}</span></td>
+				<td><span class="badge bg-success">{{this.festivalDiscountRedeemings.length}}</span></td>
+				<td>{{formatDate this.createdAt}}</td>
+				{{#if ../canEdit}}
+				<td class="text-end text-nowrap">
+					<button class="btn btn-outline-light btn-sm me-1" onclick='editGuestCount("{{this.id}}", {{this.guestCount}})' title="Edit Guest Count"><i class="bi bi-people"></i></button>
+					<button class="btn btn-outline-info btn-sm me-1" onclick='manageRedeemings("{{this.id}}")' title="Redeemings"><i class="bi bi-gift"></i></button>
+					<button class="btn btn-outline-danger btn-sm" onclick='deleteTicket("{{this.id}}", "{{this.holderProfile.name}}")' title="Delete"><i class="bi bi-trash"></i></button>
+				</td>
+				{{/if}}
+			</tr>
+			{{#if this.festivalDiscountRedeemings.length}}
+			<tr class="ticket-row-accordion" data-code="{{this.code}}" data-name="{{toLowerCase this.holderProfile.name}}">
+				<td colspan="{{#if ../canEdit}}7{{else}}6{{/if}}" class="p-0">
+					<div class="accordion accordion-flush">
+						<div class="accordion-item bg-transparent">
+							<h2 class="accordion-header">
+								<button class="accordion-button collapsed bg-transparent text-secondary py-1 px-3" type="button"
+									data-bs-toggle="collapse" data-bs-target="#redeem-{{this.id}}">
+									<small><i class="bi bi-chevron-down me-1"></i>{{this.festivalDiscountRedeemings.length}} redeemings</small>
+								</button>
+							</h2>
+							<div id="redeem-{{this.id}}" class="accordion-collapse collapse">
+								<div class="accordion-body py-1 px-3">
+									<table class="table table-dark table-sm mb-0" style="font-size:0.8rem;">
+										<thead><tr><th>Sponsor</th><th>Date</th>{{#if ../canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+										<tbody>
+											{{#each this.festivalDiscountRedeemings}}
+											<tr>
+												<td>{{this.discountLocation.sponsor.name}}</td>
+												<td>{{formatDate this.redeemedAt}}</td>
+												{{#if ../../canEdit}}
+												<td class="text-end"><button class="btn btn-outline-danger btn-sm" onclick='deleteRedeeming("{{this.id}}")' title="Remove"><i class="bi bi-x-lg"></i></button></td>
+												{{/if}}
+											</tr>
+											{{/each}}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			{{/if}}
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+{{else}}
+<div class="text-center text-secondary py-5"><i class="bi bi-ticket-perforated display-4"></i><p class="mt-2">No tickets yet</p></div>
+{{/if}}
+
+<!-- Add Ticket Modal -->
+<div class="modal fade" id="addTicketModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">New Ticket</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="tkName"></div>
+			<div class="mb-3">
+				<label class="form-label">Email</label>
+				<input type="email" class="form-control" id="tkEmail" onblur="checkEmailWarning()">
+				<div id="emailWarning" class="form-text text-warning d-none"><i class="bi bi-exclamation-triangle-fill me-1"></i>This email belongs to <strong id="emailWarningName"></strong>. The ticket will be linked to their existing profile.</div>
+			</div>
+			<div class="mb-3"><label class="form-label">Phone</label><input type="tel" class="form-control" id="tkPhone" placeholder="+40..."></div>
+			<div class="mb-3"><label class="form-label">Birth Date</label><input type="date" class="form-control" id="tkBirthDate"></div>
+			<div class="mb-3"><label class="form-label">Guest Count (0-5)</label><input type="number" class="form-control" id="tkGuestCount" min="0" max="5" value="0"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="addTicket()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Edit Guest Count Modal -->
+<div class="modal fade" id="editGuestModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-sm"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Guest Count</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="editGcId">
+			<div class="mb-3"><label class="form-label">Guests (0-5)</label><input type="number" class="form-control" id="editGcCount" min="0" max="5"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveGuestCount()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Add Redeeming Modal -->
+<div class="modal fade" id="redeemModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Add Redeeming</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="redeemTicketId">
+			<div class="mb-3"><label class="form-label">Sponsor Discount Location</label><select class="form-select" id="redeemDiscLoc"></select></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="addRedeeming()">Add</button></div>
+	</div></div>
+</div>
+
+<script>
+const editionId = '{{edition.id}}'
+const sponsorsData = {{{sponsorsJson}}}
+let allProfilesCache = null
+
+function filterTickets() {
+	const term = document.getElementById('ticketSearch').value.toLowerCase().trim()
+	document.querySelectorAll('.ticket-row, .ticket-row-accordion').forEach(row => {
+		const code = row.getAttribute('data-code') || ''
+		const name = row.getAttribute('data-name') || ''
+		if (code.toLowerCase().includes(term) || name.includes(term)) {
+			row.style.display = ''
+		} else {
+			row.style.display = 'none'
+		}
+	})
+}
+
+async function openAddTicketModal() {
+	document.getElementById('tkName').value = ''
+	document.getElementById('tkEmail').value = ''
+	document.getElementById('tkPhone').value = ''
+	document.getElementById('tkBirthDate').value = ''
+	document.getElementById('tkGuestCount').value = '0'
+	document.getElementById('emailWarning').classList.add('d-none')
+	new bootstrap.Modal(document.getElementById('addTicketModal')).show()
+	
+	if (!allProfilesCache) {
+		try {
+			allProfilesCache = await apiCall('/api/profiles')
+		} catch(e) { console.error('Failed to load profiles for email warning', e) }
+	}
+}
+
+function checkEmailWarning() {
+	const email = document.getElementById('tkEmail').value.trim().toLowerCase()
+	const warningDiv = document.getElementById('emailWarning')
+	if (!email || !allProfilesCache) {
+		warningDiv.classList.add('d-none')
+		return
+	}
+	const match = allProfilesCache.find(p => p.email.toLowerCase() === email)
+	if (match) {
+		document.getElementById('emailWarningName').textContent = match.name
+		warningDiv.classList.remove('d-none')
+		
+		// Autocomplete fields
+		document.getElementById('tkName').value = match.name || ''
+		document.getElementById('tkPhone').value = match.phone || ''
+		if (match.birthDate) {
+			document.getElementById('tkBirthDate').value = match.birthDate.substring(0, 10)
+		}
+	} else {
+		warningDiv.classList.add('d-none')
+	}
+}
+
+async function addTicket() {
+	const name = document.getElementById('tkName').value.trim()
+	const email = document.getElementById('tkEmail').value.trim()
+	const phone = document.getElementById('tkPhone').value.trim()
+	const birthDate = document.getElementById('tkBirthDate').value
+	const guestCount = parseInt(document.getElementById('tkGuestCount').value)
+	if (!name || !email || !phone || !birthDate) return showToast('All fields required', 'error')
+	try {
+		await apiCall('/api/festival-tickets', 'POST', { editionId, name, email, phone, birthDate, guestCount })
+		showToast('Ticket created')
+		bootstrap.Modal.getInstance(document.getElementById('addTicketModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function editGuestCount(id, count) {
+	document.getElementById('editGcId').value = id
+	document.getElementById('editGcCount').value = count
+	new bootstrap.Modal(document.getElementById('editGuestModal')).show()
+}
+
+async function saveGuestCount() {
+	const id = document.getElementById('editGcId').value
+	const guestCount = parseInt(document.getElementById('editGcCount').value)
+	try {
+		await apiCall(`/api/festival-tickets/${id}`, 'PATCH', { guestCount })
+		showToast('Guest count updated')
+		bootstrap.Modal.getInstance(document.getElementById('editGuestModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteTicket(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-tickets/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Redeemings ----
+function manageRedeemings(ticketId) {
+	document.getElementById('redeemTicketId').value = ticketId
+	const sel = document.getElementById('redeemDiscLoc')
+	const options = sponsorsData.flatMap(sp =>
+		(sp.festivalSponsorDiscountLocations || []).map(dl => `<option value="${dl.id}">${escapeHtml(sp.name)} — ${escapeHtml(dl.name)} (${dl.discountPercent}%)</option>`)
+	)
+	sel.innerHTML = '<option value="">Select location...</option>' + options.join('')
+	new bootstrap.Modal(document.getElementById('redeemModal')).show()
+}
+
+async function addRedeeming() {
+	const ticketId = document.getElementById('redeemTicketId').value
+	const discountLocationId = document.getElementById('redeemDiscLoc').value
+	if (!discountLocationId) return showToast('Select a location', 'error')
+	try {
+		await apiCall('/api/festival-tickets/add-redeeming', 'POST', { ticketId, discountLocationId })
+		showToast('Redeeming added')
+		bootstrap.Modal.getInstance(document.getElementById('redeemModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+async function deleteRedeeming(id) {
+	try {
+		await apiCall(`/api/festival-tickets/redeemings/${id}`, 'DELETE')
+		showToast('Redeeming removed')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+</script>
+
+{{/unless}}
+{{> foot}}

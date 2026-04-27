@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString, MaxLength, IsOptional } from 'class-validator'
+import { IsInt, IsString, MaxLength, IsOptional } from 'class-validator'
 
 export class FestivalEditionGalleryPhotoDto {
 	@IsString()
@@ -7,7 +7,6 @@ export class FestivalEditionGalleryPhotoDto {
 	photoFile?: string
 
 	@IsString()
-	@IsNotEmpty()
 	@MaxLength(500)
 	caption: string
 

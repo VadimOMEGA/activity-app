@@ -22,7 +22,11 @@ export class S3Service {
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 		'image/jpeg',
 		'image/png',
-		'image/webp'
+		'image/webp',
+		'image/svg+xml',
+		'video/mp4',
+		'video/webm',
+		'video/quicktime'
 	])
 	private readonly mimeTypeToExtension = new Map<string, string>([
 		['application/pdf', 'pdf'],
@@ -30,7 +34,11 @@ export class S3Service {
 		['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx'],
 		['image/jpeg', 'jpg'],
 		['image/png', 'png'],
-		['image/webp', 'webp']
+		['image/webp', 'webp'],
+		['image/svg+xml', 'svg'],
+		['video/mp4', 'mp4'],
+		['video/webm', 'webm'],
+		['video/quicktime', 'mov']
 	])
 
 	constructor(private readonly config: ConfigService) {

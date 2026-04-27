@@ -26,6 +26,7 @@ export class AdminAssembliesController {
 		})
 
 		const members = await this.prisma.member.findMany({
+			where: { fullMember: { isNot: null } },
 			include: { profile: true },
 			orderBy: { profile: { name: 'asc' } }
 		})

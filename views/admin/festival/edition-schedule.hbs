@@ -1,0 +1,201 @@
+{{> head}}
+{{> edition_tabs}}
+
+{{#unless edition}}
+<div class="text-center text-secondary py-5"><i class="bi bi-exclamation-triangle display-4"></i><p class="mt-2">Edition not found</p></div>
+{{else}}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<h5 class="mb-0">Schedule ({{programs.length}} entries)</h5>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openAddProgramModal()"><i class="bi bi-plus-lg me-1"></i>Add Entry</button>
+	{{/if}}
+</div>
+
+{{#if programs.length}}
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover" style="font-size:0.85rem;">
+		<thead><tr><th>Activity</th><th>Section</th><th>Location</th><th>Start</th><th>End</th><th>Presenters</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each programs}}
+			<tr>
+				<td><strong>{{this.activity.title}}</strong></td>
+				<td><span class="badge bg-secondary">{{this.activity.section.name}}</span></td>
+				<td>{{this.location.name}}</td>
+				<td>{{formatDateTime this.startsAt}}</td>
+				<td>{{formatDateTime this.endsAt}}</td>
+				<td>
+					{{#each this.festivalProgramPresenters}}
+					<span class="badge bg-info me-1">{{this.guest.profile.name}}</span>
+					{{/each}}
+					{{#unless this.festivalProgramPresenters.length}}<span class="text-secondary">—</span>{{/unless}}
+				</td>
+				{{#if ../canEdit}}
+				<td class="text-end text-nowrap">
+					<button class="btn btn-outline-light btn-sm me-1" onclick='editProgram({{{json this}}})' title="Edit"><i class="bi bi-pencil"></i></button>
+					<button class="btn btn-outline-info btn-sm me-1" onclick='managePresenters("{{{this.id}}}")' title="Presenters"><i class="bi bi-person-badge"></i></button>
+					<button class="btn btn-outline-danger btn-sm" onclick='deleteProgram("{{this.id}}", "{{this.activity.title}}")' title="Delete"><i class="bi bi-trash"></i></button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+{{else}}
+<div class="text-center text-secondary py-5"><i class="bi bi-calendar3 display-4"></i><p class="mt-2">No schedule entries yet</p></div>
+{{/if}}
+
+<!-- Add/Edit Program Modal -->
+<div class="modal fade" id="programModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="programModalTitle">Add Schedule Entry</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="progId">
+			<div class="mb-3" id="progActivityGroup"><label class="form-label">Activity</label><select class="form-select" id="progActivity"></select></div>
+			<div class="mb-3"><label class="form-label">Location</label><select class="form-select" id="progLocation"></select></div>
+			<div class="row g-3">
+				<div class="col-md-6"><label class="form-label">Start</label><input type="datetime-local" class="form-control" id="progStart"></div>
+				<div class="col-md-6"><label class="form-label">End</label><input type="datetime-local" class="form-control" id="progEnd"></div>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveProgram()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Presenters Modal -->
+<div class="modal fade" id="presentersModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Manage Presenters</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="presProgramId">
+			<div id="presentersCheckboxes" class="mb-3"></div>
+		</div>
+	</div></div>
+</div>
+
+<script>
+const editionId = '{{edition.id}}'
+const allLocations = {{{locationsJson}}}
+const allActivities = {{{activitiesJson}}}
+const allGuests = {{{guestsJson}}}
+const programsData = {{{json programs}}}
+
+function toLocalDT(iso) {
+	if (!iso) return ''
+	const d = new Date(iso)
+	return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')
+}
+
+function fillSelects(actId, locId) {
+	const actSel = document.getElementById('progActivity')
+	actSel.innerHTML = allActivities.map(a =>
+		`<option value="${a.id}" ${a.id===actId?'selected':''}>[${escapeHtml(a.section.name)}] ${escapeHtml(a.title)}</option>`
+	).join('')
+	const locSel = document.getElementById('progLocation')
+	locSel.innerHTML = allLocations.map(l =>
+		`<option value="${l.id}" ${l.id===locId?'selected':''}>${escapeHtml(l.name)}</option>`
+	).join('')
+}
+
+function openAddProgramModal() {
+	document.getElementById('progId').value = ''
+	document.getElementById('progActivityGroup').classList.remove('d-none')
+	fillSelects('', '')
+	document.getElementById('progStart').value = ''
+	document.getElementById('progEnd').value = ''
+	document.getElementById('programModalTitle').textContent = 'Add Schedule Entry'
+	new bootstrap.Modal(document.getElementById('programModal')).show()
+}
+
+function editProgram(prog) {
+	document.getElementById('progId').value = prog.id
+	document.getElementById('progActivityGroup').classList.add('d-none')
+	fillSelects(prog.activityId, prog.locationId)
+	document.getElementById('progStart').value = toLocalDT(prog.startsAt)
+	document.getElementById('progEnd').value = toLocalDT(prog.endsAt)
+	document.getElementById('programModalTitle').textContent = 'Edit Schedule Entry'
+	new bootstrap.Modal(document.getElementById('programModal')).show()
+}
+
+async function saveProgram() {
+	const id = document.getElementById('progId').value
+	const activityId = document.getElementById('progActivity').value
+	const locationId = document.getElementById('progLocation').value
+	const startsAt = document.getElementById('progStart').value
+	const endsAt = document.getElementById('progEnd').value
+	if (!activityId||!locationId||!startsAt||!endsAt) return showToast('All fields required','error')
+	try {
+		const payload = { locationId, startsAt: new Date(startsAt).toISOString(), endsAt: new Date(endsAt).toISOString() }
+		if (id) {
+			await apiCall(`/api/festival-programs/edition/${editionId}/program/${id}`, 'PUT', payload)
+		} else {
+			payload.activityId = activityId
+			payload.editionId = editionId
+			await apiCall('/api/festival-programs', 'POST', payload)
+		}
+		showToast(id ? 'Entry updated' : 'Entry added')
+		bootstrap.Modal.getInstance(document.getElementById('programModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteProgram(id, title) {
+	confirmDelete(title, async () => { await apiCall(`/api/festival-programs/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Presenters ----
+function managePresenters(programId) {
+	const prog = programsData.find(p => p.id === programId)
+	const activeGuestIds = new Set(prog.festivalProgramPresenters.map(p => p.guestId))
+	
+	const div = document.getElementById('presentersCheckboxes')
+	div.innerHTML = allGuests.map(g => `
+		<div class="form-check mb-2">
+			<input class="form-check-input" type="checkbox" id="pres_${g.id}" 
+				${activeGuestIds.has(g.id) ? 'checked' : ''} 
+				onchange='togglePresenter("${programId}", "${g.id}", this)'>
+			<label class="form-check-label d-flex align-items-center" for="pres_${g.id}">
+				${escapeHtml(g.profile.name)}
+				<div class="spinner-border spinner-border-sm text-teal ms-2 d-none" id="spin_${g.id}" role="status"></div>
+			</label>
+		</div>
+	`).join('')
+	
+	new bootstrap.Modal(document.getElementById('presentersModal')).show()
+}
+
+async function togglePresenter(programId, guestId, checkbox) {
+	const spinner = document.getElementById(`spin_${guestId}`)
+	spinner.classList.remove('d-none')
+	checkbox.disabled = true
+	try {
+		if (checkbox.checked) {
+			await apiCall(`/api/festival-programs/${programId}/presenters`, 'POST', { guestId })
+		} else {
+			await apiCall(`/api/festival-programs/${programId}/presenters`, 'DELETE', { guestId })
+		}
+		// update local data to prevent reload
+		const prog = programsData.find(p => p.id === programId)
+		const guest = allGuests.find(g => g.id === guestId)
+		if (checkbox.checked) {
+			prog.festivalProgramPresenters.push({ guestId, guest })
+		} else {
+			prog.festivalProgramPresenters = prog.festivalProgramPresenters.filter(p => p.guestId !== guestId)
+		}
+		showToast(checkbox.checked ? 'Presenter added' : 'Presenter removed')
+	} catch (e) {
+		showToast(e.message, 'error')
+		checkbox.checked = !checkbox.checked // revert
+	} finally {
+		spinner.classList.add('d-none')
+		checkbox.disabled = false
+	}
+}
+
+// Reload page when presenters modal is closed so the table updates
+document.getElementById('presentersModal').addEventListener('hidden.bs.modal', () => { reloadPage() })
+</script>
+
+{{/unless}}
+{{> foot}}

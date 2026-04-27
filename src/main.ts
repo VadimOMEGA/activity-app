@@ -28,6 +28,35 @@ async function bootstrap() {
 		const d = new Date(dateStr as string)
 		return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 	})
+	hbs.registerHelper('or', (a: unknown, b: unknown) => a || b)
+	hbs.registerHelper('gt', (a: unknown, b: unknown) => (a as number) > (b as number))
+	hbs.registerHelper('lt', (a: unknown, b: unknown) => (a as number) < (b as number))
+	hbs.registerHelper('subtract', (a: unknown, b: unknown) => (a as number) - (b as number))
+	hbs.registerHelper('assetList', (edition: any) => [
+		{ role: 'logo', label: 'Logo', url: edition.customLogoFile, isImage: true },
+		{ role: 'hero', label: 'Hero', url: edition.heroImageFile, isImage: true },
+		{ role: 'secondary', label: 'Secondary', url: edition.secondaryImageFile, isImage: true },
+		{ role: 'accent', label: 'Accent', url: edition.accentImageFile, isImage: true },
+		{ role: 'video', label: 'Video', url: edition.afterVideoFile, isImage: false }
+	])
+	hbs.registerHelper('guestRoleBadge', (role: string) => {
+		const map: Record<string, string> = {
+			SPEAKER: 'bg-primary',
+			WORKSHOP_ORGANIZER: 'bg-warning text-dark',
+			ARTIST: 'bg-success',
+			OTHER: 'bg-secondary'
+		}
+		return map[role] || 'bg-secondary'
+	})
+	hbs.registerHelper('formatDateTime', (dateStr: unknown) => {
+		if (!dateStr) return '—'
+		const d = new Date(dateStr as string)
+		return (
+			d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+			', ' +
+			d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+		)
+	})
 
 	// Static assets
 	app.useStaticAssets(join(__dirname, '..', 'public'))

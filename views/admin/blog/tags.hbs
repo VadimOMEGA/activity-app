@@ -1,0 +1,155 @@
+{{> head}}
+<div class="page-header">
+	<h1>Blog Tags</h1>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openCreateTagModal()"><i class="bi bi-plus-lg me-1"></i>New Tag</button>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead><tr><th>Name</th><th>Posts</th><th>Editions</th><th>Created</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each tags}}
+			<tr>
+				<td><strong>{{this.name}}</strong></td>
+				<td><span class="badge bg-info">{{this._count.blogPostTags}}</span></td>
+				<td><span class="badge bg-warning text-dark">{{this._count.festivalEditions}}</span></td>
+				<td>{{formatDate this.createdAt}}</td>
+				{{#if ../canEdit}}
+				<td class="text-end">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit" onclick='openEditTagModal("{{this.id}}", "{{this.name}}")'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-danger btn-sm" title="Delete" onclick='deleteTag("{{this.id}}", "{{this.name}}", {{this._count.festivalEditions}}, {{this._count.blogPostTags}})'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{#if (or this._count.blogPostTags this._count.festivalEditions)}}
+			<tr>
+				<td colspan="{{#if ../canEdit}}5{{else}}4{{/if}}" class="p-0">
+					<div class="accordion accordion-flush">
+						<div class="accordion-item bg-transparent">
+							<h2 class="accordion-header">
+								<button class="accordion-button collapsed bg-transparent text-secondary py-2 px-3" type="button"
+									data-bs-toggle="collapse" data-bs-target="#tagDetail-{{this.id}}">
+									<small><i class="bi bi-chevron-down me-1"></i>Linked posts &amp; editions</small>
+								</button>
+							</h2>
+							<div id="tagDetail-{{this.id}}" class="accordion-collapse collapse">
+								<div class="accordion-body py-2 px-3">
+									{{#if this.blogPostTags.length}}
+									<p class="text-secondary mb-1"><small><strong>Posts:</strong></small></p>
+									<ul class="list-unstyled ms-2 mb-2">
+										{{#each this.blogPostTags}}
+										<li class="mb-1">
+											<i class="bi bi-file-text me-1 text-secondary"></i>
+											{{this.post.title}}
+											{{#if this.post.publishedAt}}
+											<span class="badge bg-success ms-1">Published</span>
+											{{else}}
+											<span class="badge bg-secondary ms-1">Draft</span>
+											{{/if}}
+										</li>
+										{{/each}}
+									</ul>
+									{{/if}}
+									{{#if this.festivalEditions.length}}
+									<p class="text-secondary mb-1"><small><strong>Editions:</strong></small></p>
+									<ul class="list-unstyled ms-2 mb-0">
+										{{#each this.festivalEditions}}
+										<li class="mb-1">
+											<i class="bi bi-calendar-event me-1 text-secondary"></i>
+											{{this.year}} — {{this.title}}
+										</li>
+										{{/each}}
+									</ul>
+									{{/if}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			{{/if}}
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless tags.length}}
+<div class="text-center text-secondary py-5"><i class="bi bi-tags display-4"></i><p class="mt-2">No tags yet</p></div>
+{{/unless}}
+
+<!-- Create Tag Modal -->
+<div class="modal fade" id="createTagModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">New Tag</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="tagName" placeholder="e.g. festival-2025"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="createTag()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Edit Tag Modal -->
+<div class="modal fade" id="editTagModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Edit Tag</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="editTagId">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="editTagName"></div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveTagName()">Save</button></div>
+	</div></div>
+</div>
+
+<script>
+document.querySelectorAll('td').forEach(td=>{if(td.textContent&&td.textContent.match(/^\d{4}-\d{2}-\d{2}T/))td.textContent=formatDate(td.textContent)})
+
+function openCreateTagModal(){document.getElementById('tagName').value='';new bootstrap.Modal(document.getElementById('createTagModal')).show()}
+
+async function createTag(){
+	const name=document.getElementById('tagName').value.trim()
+	if(!name)return showToast('Name is required','error')
+	try{
+		await apiCall('/api/blog-tags','POST',{name})
+		showToast('Tag created')
+		bootstrap.Modal.getInstance(document.getElementById('createTagModal')).hide()
+		setTimeout(()=>reloadPage(),500)
+	}catch(e){showToast(e.message,'error')}
+}
+
+function openEditTagModal(id,name){
+	document.getElementById('editTagId').value=id
+	document.getElementById('editTagName').value=name
+	new bootstrap.Modal(document.getElementById('editTagModal')).show()
+}
+
+async function saveTagName(){
+	const id=document.getElementById('editTagId').value
+	const name=document.getElementById('editTagName').value.trim()
+	if(!name)return showToast('Name is required','error')
+	try{
+		await apiCall(`/api/blog-tags/${id}`,'PUT',{name})
+		showToast('Tag updated')
+		bootstrap.Modal.getInstance(document.getElementById('editTagModal')).hide()
+		setTimeout(()=>reloadPage(),500)
+	}catch(e){showToast(e.message,'error')}
+}
+
+function deleteTag(id,name,editionCount,postCount){
+	let msg=name
+	if(editionCount>0||postCount>0){
+		const parts=[]
+		if(editionCount>0)parts.push(editionCount+' edition'+(editionCount>1?'s':''))
+		if(postCount>0)parts.push(postCount+' post'+(postCount>1?'s':''))
+		msg=name+'" (used by '+parts.join(' and ')+')'
+	}
+	confirmDelete(msg,async()=>{await apiCall(`/api/blog-tags/${id}`,'DELETE');setTimeout(()=>reloadPage(),500)})
+}
+</script>
+
+{{> foot}}

@@ -1,0 +1,349 @@
+{{> head}}
+<div class="page-header">
+	<h1>Blog Posts</h1>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openPostEditor()"><i class="bi bi-plus-lg me-1"></i>New Post</button>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead><tr><th>Title</th><th>Slug</th><th>Tags</th><th>Status</th><th>Published</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each posts}}
+			<tr>
+				<td><strong>{{this.title}}</strong></td>
+				<td><code>{{this.slug}}</code></td>
+				<td>
+					{{#each this.blogPostTags}}
+					<span class="badge bg-info me-1">{{this.tag.name}}</span>
+					{{/each}}
+				</td>
+				<td>
+					{{#if this.publishedAt}}
+					<span class="badge bg-success">Published</span>
+					{{else}}
+					<span class="badge bg-secondary">Draft</span>
+					{{/if}}
+				</td>
+				<td>{{formatDate this.publishedAt}}</td>
+				{{#if ../canEdit}}
+				<td class="text-end text-nowrap">
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit" onclick='openPostEditor("{{this.id}}")'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-info btn-sm me-1" title="Preview" onclick='previewPost("{{this.id}}")'>
+						<i class="bi bi-eye"></i>
+					</button>
+					{{#if this.publishedAt}}
+					<button class="btn btn-outline-warning btn-sm me-1" title="Unpublish" onclick='togglePublish("{{this.id}}", false)'>
+						<i class="bi bi-arrow-down-circle"></i>
+					</button>
+					{{else}}
+					<button class="btn btn-outline-success btn-sm me-1" title="Publish" onclick='togglePublish("{{this.id}}", true)'>
+						<i class="bi bi-send"></i>
+					</button>
+					{{/if}}
+					<button class="btn btn-outline-danger btn-sm" title="Delete" onclick='deletePost("{{this.id}}", "{{this.title}}")'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless posts.length}}
+<div class="text-center text-secondary py-5"><i class="bi bi-file-earmark-richtext display-4"></i><p class="mt-2">No posts yet</p></div>
+{{/unless}}
+
+<style>
+	/* Add padding inside the Editor.js editable area */
+	.codex-editor__redactor {
+		padding: 1rem !important;
+		padding-bottom: 3rem !important; /* Extra space at bottom to ensure easy clicking */
+	}
+	.ce-block__content, .ce-toolbar__content {
+		max-width: 100% !important; /* Optional: lets editor take full width inside modal */
+	}
+</style>
+
+<!-- Post Editor Modal (fullscreen) -->
+<div class="modal fade" id="postEditorModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+	<div class="modal-dialog modal-fullscreen"><div class="modal-content" style="position:relative;">
+		<div class="modal-header">
+			<h5 class="modal-title" id="postEditorTitle">New Post</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+		</div>
+		<div class="modal-body" style="overflow-y:auto; padding: 4rem;">
+			<input type="hidden" id="editPostId">
+			<div class="row g-3 mb-3">
+				<div class="col-md-6">
+					<label class="form-label">Title</label>
+					<input type="text" class="form-control" id="postTitle" placeholder="My Blog Post">
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">Slug</label>
+					<div class="input-group">
+						<input type="text" class="form-control" id="postSlug" placeholder="my-blog-post">
+						<button class="btn btn-outline-secondary btn-sm" type="button" onclick="autoSlug()">Auto</button>
+					</div>
+				</div>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Summary</label>
+				<textarea class="form-control" id="postSummary" rows="2" placeholder="A short summary..."></textarea>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Tags</label>
+				<div class="tag-checkbox-grid mb-2" id="tagCheckboxes"></div>
+				<div class="input-group input-group-sm" style="max-width: 300px;">
+					<input type="text" class="form-control" id="newInlineTag" placeholder="New tag name...">
+					<button class="btn teal-outline-btn" type="button" onclick="createInlineTag()" id="btnInlineTag">Add</button>
+				</div>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Body</label>
+				<div id="editorjs"></div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+			<button class="btn btn-outline-info btn-sm" onclick="previewFromEditor()"><i class="bi bi-eye me-1"></i>Preview</button>
+			<button class="btn btn-teal btn-sm" onclick="savePost()"><i class="bi bi-check-lg me-1"></i>Save</button>
+		</div>
+	</div></div>
+</div>
+
+<!-- Preview Modal (nested on top of editor) -->
+<div class="modal fade" id="postPreviewModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title">Post Preview</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+		</div>
+		<div class="modal-body post-preview-body" id="previewBody"></div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button></div>
+	</div></div>
+</div>
+
+<!-- Editor.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.8.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@2.0.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.7.4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.4.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+
+<script>
+// ---- Data from server ----
+const allTags = {{{tagsJson}}}
+const postsData = {{{json posts}}}
+
+// ---- Editor.js instance ----
+let editor = null
+
+function initEditor(data) {
+	if (editor) { editor.destroy(); editor = null }
+	editor = new EditorJS({
+		holder: 'editorjs',
+		tools: {
+			header: { class: Header, config: { levels: [2, 3, 4], defaultLevel: 2 } },
+			list: { class: EditorjsList, inlineToolbar: true },
+			quote: { class: Quote, inlineToolbar: true },
+			delimiter: Delimiter,
+			code: CodeTool
+		},
+		data: data || {},
+		placeholder: 'Start writing your post...',
+		minHeight: 200
+	})
+}
+
+// ---- Tag Checkboxes ----
+function renderTagCheckboxes(selectedIds) {
+	const container = document.getElementById('tagCheckboxes')
+	if (!allTags.length) {
+		container.innerHTML = '<span class="text-secondary" style="grid-column: 1 / -1;"><small>No tags available. Create one below.</small></span>'
+		return
+	}
+	container.innerHTML = allTags.map(t => {
+		const checked = selectedIds.includes(t.id) ? 'checked' : ''
+		return `<div class="form-check"><input class="form-check-input tag-cb" type="checkbox" value="${t.id}" id="tag-${t.id}" ${checked}><label class="form-check-label" for="tag-${t.id}">${escapeHtml(t.name)}</label></div>`
+	}).join('')
+}
+
+function getSelectedTagIds() {
+	return [...document.querySelectorAll('.tag-cb:checked')].map(cb => cb.value)
+}
+
+async function createInlineTag() {
+	const input = document.getElementById('newInlineTag')
+	const btn = document.getElementById('btnInlineTag')
+	const name = input.value.trim()
+	if (!name) return showToast('Tag name cannot be empty', 'error')
+
+	input.disabled = true
+	btn.disabled = true
+	try {
+		const newTag = await apiCall('/api/blog-tags', 'POST', { name })
+		allTags.push(newTag)
+		const selectedIds = getSelectedTagIds()
+		selectedIds.push(newTag.id) // Auto-select the newly created tag
+		renderTagCheckboxes(selectedIds)
+		input.value = ''
+		showToast('Tag created')
+	} catch(e) {
+		showToast(e.message, 'error')
+	} finally {
+		input.disabled = false
+		btn.disabled = false
+		input.focus()
+	}
+}
+
+// ---- Open Editor ----
+function openPostEditor(postId) {
+	document.getElementById('editPostId').value = postId || ''
+	document.getElementById('postEditorTitle').textContent = postId ? 'Edit Post' : 'New Post'
+
+	if (postId) {
+		const post = postsData.find(p => p.id === postId)
+		if (!post) return showToast('Post not found', 'error')
+		document.getElementById('postTitle').value = post.title
+		document.getElementById('postSlug').value = post.slug
+		document.getElementById('postSummary').value = post.summary
+		const tagIds = post.blogPostTags.map(pt => pt.tag.id)
+		renderTagCheckboxes(tagIds)
+
+		let bodyData = {}
+		try { bodyData = typeof post.body === 'string' ? JSON.parse(post.body) : post.body } catch(e) {}
+		// Wait for modal to show then init editor
+		const modal = document.getElementById('postEditorModal')
+		const bsModal = new bootstrap.Modal(modal)
+		modal.addEventListener('shown.bs.modal', function handler() {
+			modal.removeEventListener('shown.bs.modal', handler)
+			initEditor(bodyData)
+		})
+		bsModal.show()
+	} else {
+		document.getElementById('postTitle').value = ''
+		document.getElementById('postSlug').value = ''
+		document.getElementById('postSummary').value = ''
+		renderTagCheckboxes([])
+		const modal = document.getElementById('postEditorModal')
+		const bsModal = new bootstrap.Modal(modal)
+		modal.addEventListener('shown.bs.modal', function handler() {
+			modal.removeEventListener('shown.bs.modal', handler)
+			initEditor()
+		})
+		bsModal.show()
+	}
+}
+
+// ---- Auto Slug ----
+function autoSlug() {
+	const title = document.getElementById('postTitle').value
+	document.getElementById('postSlug').value = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
+// Also auto-slug on title blur if slug is empty
+document.getElementById('postTitle').addEventListener('blur', function() {
+	if (!document.getElementById('postSlug').value.trim()) autoSlug()
+})
+
+// ---- Save Post ----
+async function savePost() {
+	const modal = document.getElementById('postEditorModal')
+	const postId = document.getElementById('editPostId').value
+	const title = document.getElementById('postTitle').value.trim()
+	const slug = document.getElementById('postSlug').value.trim()
+	const summary = document.getElementById('postSummary').value.trim()
+	const tagIds = getSelectedTagIds()
+
+	if (!title || !slug || !summary) return showToast('Title, slug, and summary are required', 'error')
+	if (tagIds.length === 0) return showToast('Select at least one tag', 'error')
+
+	let bodyData
+	try { bodyData = await editor.save() } catch(e) { return showToast('Error saving editor content', 'error') }
+
+	const payload = { title, slug, summary, body: JSON.stringify(bodyData), tagIds }
+
+	showModalLoader(modal, 'Saving...')
+	try {
+		if (postId) {
+			await apiCall(`/api/blog-posts/${postId}`, 'PUT', payload)
+			showToast('Post updated')
+		} else {
+			await apiCall('/api/blog-posts', 'POST', payload)
+			showToast('Post created')
+		}
+		hideModalLoader(modal)
+		bootstrap.Modal.getInstance(modal).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) {
+		hideModalLoader(modal)
+		showToast(e.message, 'error')
+	}
+}
+
+// ---- Preview ----
+function renderPreview(editorData) {
+	if (!editorData || !editorData.blocks) return '<p class="text-secondary">No content</p>'
+	let html = editorData.blocks.map(block => {
+		switch (block.type) {
+			case 'header': return `<h${block.data.level}>${block.data.text}</h${block.data.level}>`
+			case 'paragraph': return `<p>${block.data.text}</p>`
+			case 'list':
+				const tag = block.data.style === 'ordered' ? 'ol' : 'ul'
+				return `<${tag}>${block.data.items.map(i => `<li>${typeof i === 'string' ? i : i.content || ''}</li>`).join('')}</${tag}>`
+			case 'quote': return `<blockquote>${block.data.text}${block.data.caption ? `<footer class="text-secondary mt-1">— ${block.data.caption}</footer>` : ''}</blockquote>`
+			case 'delimiter': return '<hr>'
+			case 'code': return `<pre class="text-white bg-secondary rounded p-2"><code>${escapeHtml(block.data.code)}</code></pre>`
+			default: return ''
+		}
+	}).join('')
+	
+	// Force all inline links to open in a new tab
+	return html.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ')
+}
+
+async function previewFromEditor() {
+	let bodyData
+	try { bodyData = await editor.save() } catch(e) { return showToast('Error reading editor', 'error') }
+	document.getElementById('previewBody').innerHTML = renderPreview(bodyData)
+	new bootstrap.Modal(document.getElementById('postPreviewModal')).show()
+}
+
+function previewPost(postId) {
+	const post = postsData.find(p => p.id === postId)
+	if (!post) return
+	let bodyData = {}
+	try { bodyData = typeof post.body === 'string' ? JSON.parse(post.body) : post.body } catch(e) {}
+	document.getElementById('previewBody').innerHTML = renderPreview(bodyData)
+	new bootstrap.Modal(document.getElementById('postPreviewModal')).show()
+}
+
+// ---- Publish / Unpublish ----
+async function togglePublish(postId, publish) {
+	try {
+		await apiCall(`/api/blog-posts/${postId}/${publish ? 'publish' : 'unpublish'}`, 'PATCH')
+		showToast(publish ? 'Post published' : 'Post unpublished')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+// ---- Delete ----
+function deletePost(id, title) {
+	confirmDelete(title, async () => { await apiCall(`/api/blog-posts/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Cleanup editor on modal close ----
+document.getElementById('postEditorModal').addEventListener('hidden.bs.modal', function() {
+	if (editor) { editor.destroy(); editor = null }
+})
+</script>
+
+{{> foot}}

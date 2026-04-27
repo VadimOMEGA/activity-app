@@ -9,6 +9,9 @@ import { AdminMeetupsController } from './admin-meetups.controller'
 import { AdminDojoController } from './admin-dojo.controller'
 import { AdminAgreementsController } from './admin-agreements.controller'
 import { AdminAssembliesController } from './admin-assemblies.controller'
+import { AdminBlogController } from './admin-blog.controller'
+import { AdminFestivalController } from './admin-festival.controller'
+import { AdminFestivalDetailController } from './admin-festival-detail.controller'
 import { AdminAuthGuard } from './guards/admin-auth.guard'
 import { PrismaService } from 'src/prisma.service'
 
@@ -31,7 +34,10 @@ import { PrismaService } from 'src/prisma.service'
 		AdminMeetupsController,
 		AdminDojoController,
 		AdminAgreementsController,
-		AdminAssembliesController
+		AdminAssembliesController,
+		AdminBlogController,
+		AdminFestivalController,
+		AdminFestivalDetailController
 	],
 	providers: [AdminAuthGuard, PrismaService],
 	exports: [AdminAuthGuard, JwtModule]

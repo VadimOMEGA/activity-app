@@ -1,0 +1,278 @@
+{{> head}}
+{{> edition_tabs}}
+
+{{#unless edition}}
+<div class="text-center text-secondary py-5"><i class="bi bi-exclamation-triangle display-4"></i><p class="mt-2">Edition not found</p></div>
+{{else}}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<h5 class="mb-0">Sponsors ({{sponsors.length}})</h5>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openAddSponsorModal()"><i class="bi bi-plus-lg me-1"></i>Add Sponsor</button>
+	{{/if}}
+</div>
+
+{{#if sponsors.length}}
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover" style="font-size:0.85rem;">
+		<thead><tr><th>Logo</th><th>Name</th><th>Type</th><th>Level</th><th>Website</th><th>Discounts</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each sponsors}}
+			<tr>
+				<td>{{#if this.logoFile}}<img src="{{this.logoFile}}" style="width:32px;height:32px;object-fit:contain;border-radius:4px;">{{else}}—{{/if}}</td>
+				<td><strong>{{this.name}}</strong></td>
+				<td><span class="badge bg-secondary">{{this.type}}</span></td>
+				<td><span class="badge bg-warning text-dark">{{this.level}}</span></td>
+				<td><a href="{{this.website}}" target="_blank" class="text-truncate d-inline-block" style="max-width:150px;">{{this.website}}</a></td>
+				<td><span class="badge bg-info">{{this.festivalSponsorDiscountLocations.length}}</span></td>
+				{{#if ../canEdit}}
+				<td class="text-end text-nowrap">
+					<button class="btn btn-outline-light btn-sm me-1" onclick='editSponsor({{{json this}}})' title="Edit"><i class="bi bi-pencil"></i></button>
+					<button class="btn btn-outline-info btn-sm me-1" onclick='openAddDiscount("{{{this.id}}}")' title="Add Discount Location"><i class="bi bi-geo-alt"></i></button>
+					<button class="btn btn-outline-danger btn-sm" onclick='deleteSponsor("{{this.id}}", "{{this.name}}")' title="Delete"><i class="bi bi-trash"></i></button>
+				</td>
+				{{/if}}
+			</tr>
+			{{#if this.festivalSponsorDiscountLocations.length}}
+			<tr>
+				<td colspan="{{#if ../canEdit}}7{{else}}6{{/if}}" class="p-0">
+					<div class="accordion accordion-flush">
+						<div class="accordion-item bg-transparent border-0">
+							<h2 class="accordion-header">
+								<button class="accordion-button collapsed bg-transparent text-secondary py-1 px-3 shadow-none" type="button"
+									data-bs-toggle="collapse" data-bs-target="#disc-{{this.id}}">
+									<small><i class="bi bi-chevron-down me-1"></i>{{this.festivalSponsorDiscountLocations.length}} discount locations</small>
+								</button>
+							</h2>
+							<div id="disc-{{this.id}}" class="accordion-collapse collapse">
+								<div class="accordion-body py-1 px-3">
+									<table class="table table-dark table-sm mb-0" style="font-size:0.8rem;">
+										<thead><tr><th>Name</th><th>Address</th><th>Discount</th><th>Max</th><th class="text-end">Actions</th></tr></thead>
+										<tbody>
+											{{#each this.festivalSponsorDiscountLocations}}
+											<tr>
+												<td>{{this.name}}</td>
+												<td>{{this.address}}</td>
+												<td>{{this.discountPercent}}%</td>
+												<td>{{this.redeemMax}}</td>
+												{{#if ../../canEdit}}
+												<td class="text-end">
+													<button class="btn btn-outline-light btn-sm me-1" onclick='editDiscount({{{json this}}})' title="Edit"><i class="bi bi-pencil"></i></button>
+													<button class="btn btn-outline-danger btn-sm" onclick='deleteDiscount("{{this.id}}", "{{this.name}}")' title="Remove"><i class="bi bi-x-lg"></i></button>
+												</td>
+												{{/if}}
+											</tr>
+											{{/each}}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			{{/if}}
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+{{else}}
+<div class="text-center text-secondary py-5"><i class="bi bi-shop display-4"></i><p class="mt-2">No sponsors yet</p></div>
+{{/if}}
+
+<!-- Sponsor Modal -->
+<div class="modal fade" id="sponsorModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="sponsorModalTitle">Add Sponsor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="spId">
+			<div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="spName"></div>
+			<div class="row g-3">
+				<div class="col-md-6"><label class="form-label">Type</label>
+					<select class="form-select" id="spType">
+						<option value="MEDIA">Media</option>
+						<option value="INSTITUTION">Institution</option>
+						<option value="CATERING">Catering</option>
+						<option value="PUBLISHING">Publishing</option>
+						<option value="OTHER">Other</option>
+					</select>
+				</div>
+				<div class="col-md-6"><label class="form-label">Level</label>
+					<select class="form-select" id="spLevel">
+						<option value="WHISPERER">Whisperer</option>
+						<option value="CHARMER">Charmer</option>
+						<option value="LOUDSPEAKER">Loudspeaker</option>
+						<option value="DIFFUSION_VOICE">Diffusion Voice</option>
+					</select>
+				</div>
+			</div>
+			<div class="mb-3 mt-3"><label class="form-label">Website</label><input type="url" class="form-control" id="spWebsite"></div>
+			<div class="mb-3">
+				<label class="form-label">Logo</label>
+				<div class="d-flex align-items-center mb-2" id="spLogoPreviewContainer" style="display:none !important;">
+					<img id="spLogoPreview" src="" style="width:48px;height:48px;object-fit:contain;border-radius:4px;background:#fff;padding:2px;" class="me-2">
+					<button type="button" class="btn btn-outline-light btn-sm" onclick="document.getElementById('spLogoFile').click()">Replace</button>
+				</div>
+				<input type="file" class="form-control" id="spLogoFile" accept="image/*">
+				<input type="hidden" id="spLogoUrl">
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveSponsor()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Add Discount Location Modal -->
+<div class="modal fade" id="discountsModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title" id="discountsModalTitle">Add Discount Location</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="discSponsorId">
+			<input type="hidden" id="discId">
+			<div class="mb-3"><label class="form-label">Location Name</label><input type="text" class="form-control" id="discName"></div>
+			<div class="mb-3"><label class="form-label">Address</label><input type="text" class="form-control" id="discAddress"></div>
+			<div class="row g-3">
+				<div class="col-6"><label class="form-label">Discount %</label><input type="number" class="form-control" id="discPercent" min="1" max="100"></div>
+				<div class="col-6"><label class="form-label">Max Redemptions</label><input type="number" class="form-control" id="discRedeemMax" min="1" value="100"></div>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="addDiscount()">Save</button></div>
+	</div></div>
+</div>
+
+<div id="fullSpinner" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 z-index-master d-flex justify-content-center align-items-center" style="z-index: 9999;">
+	<div class="spinner-border text-teal" role="status" style="width: 3rem; height: 3rem;"></div>
+</div>
+
+<script>
+const editionId = '{{edition.id}}'
+const sponsorsData = {{{sponsorsJson}}}
+
+function openAddSponsorModal() {
+	document.getElementById('spId').value = ''
+	document.getElementById('spName').value = ''
+	document.getElementById('spType').value = 'MEDIA'
+	document.getElementById('spLevel').value = 'WHISPERER'
+	document.getElementById('spWebsite').value = ''
+	document.getElementById('spLogoUrl').value = ''
+	document.getElementById('spLogoFile').value = ''
+	document.getElementById('spLogoFile').style.display = 'block'
+	document.getElementById('spLogoPreviewContainer').style.setProperty('display', 'none', 'important')
+	document.getElementById('sponsorModalTitle').textContent = 'Add Sponsor'
+	new bootstrap.Modal(document.getElementById('sponsorModal')).show()
+}
+
+function editSponsor(sp) {
+	document.getElementById('spId').value = sp.id
+	document.getElementById('spName').value = sp.name
+	document.getElementById('spType').value = sp.type
+	document.getElementById('spLevel').value = sp.level
+	document.getElementById('spWebsite').value = sp.website
+	document.getElementById('spLogoUrl').value = sp.logoFile || ''
+	document.getElementById('spLogoFile').value = ''
+	
+	if (sp.logoFile) {
+		document.getElementById('spLogoPreview').src = sp.logoFile
+		document.getElementById('spLogoPreviewContainer').style.setProperty('display', 'flex', 'important')
+		document.getElementById('spLogoFile').style.display = 'none'
+	} else {
+		document.getElementById('spLogoPreviewContainer').style.setProperty('display', 'none', 'important')
+		document.getElementById('spLogoFile').style.display = 'block'
+	}
+	
+	document.getElementById('sponsorModalTitle').textContent = 'Edit Sponsor'
+	new bootstrap.Modal(document.getElementById('sponsorModal')).show()
+}
+
+async function saveSponsor() {
+	const id = document.getElementById('spId').value
+	const name = document.getElementById('spName').value.trim()
+	const type = document.getElementById('spType').value
+	const level = document.getElementById('spLevel').value
+	const website = document.getElementById('spWebsite').value.trim()
+	let logoUrl = document.getElementById('spLogoUrl').value.trim()
+	const fileInput = document.getElementById('spLogoFile')
+
+	if (!name || !website) return showToast('Name and website required', 'error')
+	if (name.length > 200) return showToast('Name is too long (max 200 characters)', 'error')
+	if (!id && !fileInput.files.length) return showToast('Logo is required for new sponsors', 'error')
+
+	document.getElementById('fullSpinner').classList.remove('d-none')
+	try {
+		// Upload file if selected
+		if (fileInput.files.length > 0) {
+			const file = fileInput.files[0]
+			const intentRes = await apiCall(`/api/festival-sponsors/edition/${editionId}/upload-intents`, 'POST', {
+				name, type, level, website, originalFileName: file.name, contentType: file.type
+			})
+			await fetch(intentRes.uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
+			logoUrl = intentRes.publicUrl
+		}
+
+		if (id) {
+			await apiCall(`/api/festival-sponsors/${id}`, 'PUT', { name, type, level, website, logoFile: logoUrl })
+		} else {
+			await apiCall('/api/festival-sponsors', 'POST', { editionId, name, type, level, website, logoFile: logoUrl })
+		}
+		showToast(id ? 'Sponsor updated' : 'Sponsor added')
+		bootstrap.Modal.getInstance(document.getElementById('sponsorModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { 
+		showToast(e.message, 'error') 
+	} finally {
+		document.getElementById('fullSpinner').classList.add('d-none')
+	}
+}
+
+function deleteSponsor(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-sponsors/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+
+// ---- Discount Locations ----
+function openAddDiscount(sponsorId) {
+	document.getElementById('discSponsorId').value = sponsorId
+	document.getElementById('discId').value = ''
+	document.getElementById('discName').value = ''
+	document.getElementById('discAddress').value = ''
+	document.getElementById('discPercent').value = ''
+	document.getElementById('discRedeemMax').value = '100'
+	document.getElementById('discountsModalTitle').textContent = 'Add Discount Location'
+	new bootstrap.Modal(document.getElementById('discountsModal')).show()
+}
+
+function editDiscount(loc) {
+	document.getElementById('discSponsorId').value = loc.sponsorId
+	document.getElementById('discId').value = loc.id
+	document.getElementById('discName').value = loc.name
+	document.getElementById('discAddress').value = loc.address
+	document.getElementById('discPercent').value = loc.discountPercent
+	document.getElementById('discRedeemMax').value = loc.redeemMax
+	document.getElementById('discountsModalTitle').textContent = 'Edit Discount Location'
+	new bootstrap.Modal(document.getElementById('discountsModal')).show()
+}
+
+async function addDiscount() {
+	const sponsorId = document.getElementById('discSponsorId').value
+	const id = document.getElementById('discId').value
+	const name = document.getElementById('discName').value.trim()
+	const address = document.getElementById('discAddress').value.trim()
+	const discountPercent = parseInt(document.getElementById('discPercent').value)
+	const redeemMax = parseInt(document.getElementById('discRedeemMax').value)
+	if (!name || !address || !discountPercent || !redeemMax) return showToast('All fields required', 'error')
+	try {
+		if (id) {
+			await apiCall(`/api/festival-sponsor-discount-locations/${id}`, 'PUT', { name, address, discountPercent, redeemMax })
+		} else {
+			await apiCall('/api/festival-sponsor-discount-locations', 'POST', { sponsorId, name, address, discountPercent, redeemMax })
+		}
+		showToast(id ? 'Location updated' : 'Location added')
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+function deleteDiscount(id, name) {
+	confirmDelete(name, async () => { await apiCall(`/api/festival-sponsor-discount-locations/${id}`, 'DELETE'); setTimeout(() => reloadPage(), 500) })
+}
+</script>
+
+{{/unless}}
+{{> foot}}

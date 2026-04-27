@@ -1,7 +1,6 @@
 import { Controller, Get, Render, Req, Res, UseGuards } from '@nestjs/common'
 import type { Request, Response } from 'express'
 
-import { AdminAuthGuard } from './guards/admin-auth.guard'
 import { LoggedInGuard } from './guards/logged-in.guard'
 import { PrismaService } from 'src/prisma.service'
 
@@ -51,7 +50,9 @@ export class AdminController {
 			assemblies,
 			documents,
 			fees,
-			roles
+			roles,
+			editions,
+			blogPosts
 		] = await Promise.all([
 			this.prisma.user.count(),
 			this.prisma.member.count(),
@@ -63,7 +64,9 @@ export class AdminController {
 			this.prisma.generalAssembly.count(),
 			this.prisma.agreementDocument.count(),
 			this.prisma.membershipFee.count(),
-			this.prisma.role.count()
+			this.prisma.role.count(),
+			this.prisma.festivalEdition.count(),
+			this.prisma.blogPost.count()
 		])
 
 		return res.render('admin/dashboard', {
@@ -82,7 +85,9 @@ export class AdminController {
 				assemblies,
 				documents,
 				fees,
-				roles
+				roles,
+				editions,
+				blogPosts
 			}
 		})
 	}

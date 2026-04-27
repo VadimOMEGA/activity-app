@@ -1,0 +1,291 @@
+{{> head}}
+<div class="page-header">
+	<h1>Festival Editions</h1>
+	{{#if canEdit}}
+	<button class="btn btn-teal btn-sm" onclick="openCreateEditionModal()"><i class="bi bi-plus-lg me-1"></i>New Edition</button>
+	{{/if}}
+</div>
+
+<div class="table-responsive">
+	<table class="table table-dark table-striped table-hover">
+		<thead><tr><th>Year</th><th>Title</th><th>Theme</th><th>Colors</th><th>Blog Tag</th>{{#if canEdit}}<th class="text-end">Actions</th>{{/if}}</tr></thead>
+		<tbody>
+			{{#each editions}}
+			<tr>
+				<td><strong>{{this.year}}</strong></td>
+				<td>{{this.title}}</td>
+				<td class="truncate">{{this.theme}}</td>
+				<td>
+					<span class="d-inline-block rounded-circle me-1" style="width:16px;height:16px;background:{{this.mainColor}};border:1px solid rgba(255,255,255,0.2);" title="Main: {{this.mainColor}}"></span>
+					<span class="d-inline-block rounded-circle" style="width:16px;height:16px;background:{{this.accentColor}};border:1px solid rgba(255,255,255,0.2);" title="Accent: {{this.accentColor}}"></span>
+				</td>
+				<td><span class="badge bg-info">{{this.blogTag.name}}</span></td>
+				{{#if ../canEdit}}
+				<td class="text-end text-nowrap">
+					<a class="btn btn-outline-teal btn-sm me-1" href="/admin/festival/editions/{{this.id}}" title="View Dashboard">
+						<i class="bi bi-eye"></i>
+					</a>
+					<button class="btn btn-outline-light btn-sm me-1" title="Edit Metadata" onclick='openEditEditionModal("{{this.id}}")'>
+						<i class="bi bi-pencil"></i>
+					</button>
+					<button class="btn btn-outline-danger btn-sm" title="Delete" onclick='deleteEdition("{{this.id}}", "{{this.year}} — {{this.title}}")'>
+						<i class="bi bi-trash"></i>
+					</button>
+				</td>
+				{{/if}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+
+{{#unless editions.length}}
+<div class="text-center text-secondary py-5"><i class="bi bi-music-note-beamed display-4"></i><p class="mt-2">No editions yet</p></div>
+{{/unless}}
+
+<!-- Create Edition Modal -->
+<div class="modal fade" id="createEditionModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">New Edition</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<div class="row g-3">
+				<div class="col-md-4">
+					<label class="form-label">Year</label>
+					<input type="number" class="form-control" id="edYear" min="2020" max="2100">
+				</div>
+				<div class="col-md-8">
+					<label class="form-label">Title</label>
+					<input type="text" class="form-control" id="edTitle">
+				</div>
+				<div class="col-md-12">
+					<label class="form-label">Theme</label>
+					<input type="text" class="form-control" id="edTheme">
+				</div>
+				<div class="col-md-12">
+					<label class="form-label">Short Description</label>
+					<textarea class="form-control" id="edShortDesc" rows="2" maxlength="500"></textarea>
+				</div>
+				<div class="col-md-12">
+					<label class="form-label">Long Description</label>
+					<textarea class="form-control" id="edLongDesc" rows="4" maxlength="3000"></textarea>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Main Color</label>
+					<div class="d-flex gap-2 align-items-center">
+						<input type="color" class="form-control form-control-color" id="edMainColor" value="#0d9488">
+						<input type="text" class="form-control form-control-sm" id="edMainColorHex" value="#0d9488" readonly style="width:90px;">
+					</div>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Accent Color</label>
+					<div class="d-flex gap-2 align-items-center">
+						<input type="color" class="form-control form-control-color" id="edAccentColor" value="#14b8a6">
+						<input type="text" class="form-control form-control-sm" id="edAccentColorHex" value="#14b8a6" readonly style="width:90px;">
+					</div>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Blog Tag</label>
+					<select class="form-select mb-2" id="edBlogTagId">
+						<option value="">Select tag...</option>
+					</select>
+					<div class="input-group input-group-sm">
+						<input type="text" class="form-control" id="newInlineTagCreate" placeholder="New tag...">
+						<button class="btn teal-outline-btn" type="button" onclick="createInlineTag('edBlogTagId', 'newInlineTagCreate', 'btnInlineTagCreate')" id="btnInlineTagCreate">Add</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="createEdition()">Save</button></div>
+	</div></div>
+</div>
+
+<!-- Edit Edition Modal -->
+<div class="modal fade" id="editEditionModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg"><div class="modal-content">
+		<div class="modal-header"><h5 class="modal-title">Edit Edition</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+		<div class="modal-body">
+			<input type="hidden" id="editEdId">
+			<div class="row g-3">
+				<div class="col-md-4">
+					<label class="form-label">Year</label>
+					<input type="number" class="form-control" id="editEdYear" min="2020" max="2100">
+				</div>
+				<div class="col-md-8">
+					<label class="form-label">Title</label>
+					<input type="text" class="form-control" id="editEdTitle">
+				</div>
+				<div class="col-md-12">
+					<label class="form-label">Theme</label>
+					<input type="text" class="form-control" id="editEdTheme">
+				</div>
+				<div class="col-md-12">
+					<label class="form-label">Short Description</label>
+					<textarea class="form-control" id="editEdShortDesc" rows="2" maxlength="500"></textarea>
+				</div>
+				<div class="col-md-12">
+					<label class="form-label">Long Description</label>
+					<textarea class="form-control" id="editEdLongDesc" rows="4" maxlength="3000"></textarea>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Main Color</label>
+					<div class="d-flex gap-2 align-items-center">
+						<input type="color" class="form-control form-control-color" id="editEdMainColor">
+						<input type="text" class="form-control form-control-sm" id="editEdMainColorHex" readonly style="width:90px;">
+					</div>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Accent Color</label>
+					<div class="d-flex gap-2 align-items-center">
+						<input type="color" class="form-control form-control-color" id="editEdAccentColor">
+						<input type="text" class="form-control form-control-sm" id="editEdAccentColorHex" readonly style="width:90px;">
+					</div>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Blog Tag</label>
+					<select class="form-select mb-2" id="editEdBlogTagId">
+						<option value="">Select tag...</option>
+					</select>
+					<div class="input-group input-group-sm">
+						<input type="text" class="form-control" id="newInlineTagEdit" placeholder="New tag...">
+						<button class="btn teal-outline-btn" type="button" onclick="createInlineTag('editEdBlogTagId', 'newInlineTagEdit', 'btnInlineTagEdit')" id="btnInlineTagEdit">Add</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button><button class="btn btn-teal btn-sm" onclick="saveEdition()">Save</button></div>
+	</div></div>
+</div>
+
+<script>
+const allTags = {{{tagsJson}}}
+const editionsData = {{{json editions}}}
+
+// ---- Color picker sync ----
+function syncColor(pickerId, hexId) {
+	const picker = document.getElementById(pickerId)
+	const hex = document.getElementById(hexId)
+	picker.addEventListener('input', () => { hex.value = picker.value })
+}
+syncColor('edMainColor', 'edMainColorHex')
+syncColor('edAccentColor', 'edAccentColorHex')
+syncColor('editEdMainColor', 'editEdMainColorHex')
+syncColor('editEdAccentColor', 'editEdAccentColorHex')
+
+// ---- Populate tag dropdowns ----
+function fillTagSelect(selectId, selectedId) {
+	const sel = document.getElementById(selectId)
+	sel.innerHTML = '<option value="">Select tag...</option>' + allTags.map(t =>
+		`<option value="${t.id}" ${t.id === selectedId ? 'selected' : ''}>${escapeHtml(t.name)}</option>`
+	).join('')
+}
+
+// ---- Inline Tag Creation ----
+async function createInlineTag(selectId, inputId, btnId) {
+	const input = document.getElementById(inputId)
+	const btn = document.getElementById(btnId)
+	const name = input.value.trim()
+	if (!name) return showToast('Tag name cannot be empty', 'error')
+
+	input.disabled = true
+	btn.disabled = true
+	try {
+		const newTag = await apiCall('/api/blog-tags', 'POST', { name })
+		allTags.push(newTag)
+		fillTagSelect(selectId, newTag.id)
+		input.value = ''
+		showToast('Tag created')
+	} catch(e) {
+		showToast(e.message, 'error')
+	} finally {
+		input.disabled = false
+		btn.disabled = false
+	}
+}
+
+// ---- Create ----
+function openCreateEditionModal() {
+	document.getElementById('edYear').value = new Date().getFullYear()
+	document.getElementById('edTitle').value = ''
+	document.getElementById('edTheme').value = ''
+	document.getElementById('edShortDesc').value = ''
+	document.getElementById('edLongDesc').value = ''
+	document.getElementById('edMainColor').value = '#0d9488'
+	document.getElementById('edMainColorHex').value = '#0d9488'
+	document.getElementById('edAccentColor').value = '#14b8a6'
+	document.getElementById('edAccentColorHex').value = '#14b8a6'
+	fillTagSelect('edBlogTagId', '')
+	new bootstrap.Modal(document.getElementById('createEditionModal')).show()
+}
+
+async function createEdition() {
+	const year = parseInt(document.getElementById('edYear').value)
+	const title = document.getElementById('edTitle').value.trim()
+	const theme = document.getElementById('edTheme').value.trim()
+	const shortDescription = document.getElementById('edShortDesc').value.trim()
+	const longDescription = document.getElementById('edLongDesc').value.trim()
+	const mainColor = document.getElementById('edMainColor').value
+	const accentColor = document.getElementById('edAccentColor').value
+	const blogTagId = document.getElementById('edBlogTagId').value
+
+	if (!year || !title || !theme || !shortDescription || !longDescription || !blogTagId) {
+		return showToast('All fields are required', 'error')
+	}
+
+	try {
+		await apiCall('/api/festival-editions', 'POST', { year, title, theme, shortDescription, longDescription, mainColor, accentColor, blogTagId })
+		showToast('Edition created')
+		bootstrap.Modal.getInstance(document.getElementById('createEditionModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+// ---- Edit ----
+function openEditEditionModal(id) {
+	const edition = editionsData.find(e => e.id === id)
+	document.getElementById('editEdId').value = edition.id
+	document.getElementById('editEdYear').value = edition.year
+	document.getElementById('editEdTitle').value = edition.title
+	document.getElementById('editEdTheme').value = edition.theme
+	document.getElementById('editEdShortDesc').value = edition.shortDescription
+	document.getElementById('editEdLongDesc').value = edition.longDescription
+	document.getElementById('editEdMainColor').value = edition.mainColor
+	document.getElementById('editEdMainColorHex').value = edition.mainColor
+	document.getElementById('editEdAccentColor').value = edition.accentColor
+	document.getElementById('editEdAccentColorHex').value = edition.accentColor
+	fillTagSelect('editEdBlogTagId', edition.blogTagId)
+	new bootstrap.Modal(document.getElementById('editEditionModal')).show()
+}
+
+async function saveEdition() {
+	const id = document.getElementById('editEdId').value
+	const year = parseInt(document.getElementById('editEdYear').value)
+	const title = document.getElementById('editEdTitle').value.trim()
+	const theme = document.getElementById('editEdTheme').value.trim()
+	const shortDescription = document.getElementById('editEdShortDesc').value.trim()
+	const longDescription = document.getElementById('editEdLongDesc').value.trim()
+	const mainColor = document.getElementById('editEdMainColor').value
+	const accentColor = document.getElementById('editEdAccentColor').value
+	const blogTagId = document.getElementById('editEdBlogTagId').value
+
+	if (!year || !title || !theme || !shortDescription || !longDescription || !blogTagId) {
+		return showToast('All fields are required', 'error')
+	}
+
+	try {
+		await apiCall(`/api/festival-editions/${id}`, 'PUT', { year, title, theme, shortDescription, longDescription, mainColor, accentColor, blogTagId })
+		showToast('Edition updated')
+		bootstrap.Modal.getInstance(document.getElementById('editEditionModal')).hide()
+		setTimeout(() => reloadPage(), 500)
+	} catch(e) { showToast(e.message, 'error') }
+}
+
+// ---- Delete ----
+function deleteEdition(id, label) {
+	confirmDelete(label + '" (all related data will be deleted)', async () => {
+		await apiCall(`/api/festival-editions/${id}`, 'DELETE')
+		setTimeout(() => reloadPage(), 500)
+	})
+}
+</script>
+
+{{> foot}}

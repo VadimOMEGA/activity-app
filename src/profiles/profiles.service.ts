@@ -70,10 +70,15 @@ export class ProfilesService {
 				}
 			}
 		})
-		if (!existingProfile || !existingProfile.user) throw new NotFoundException('Profile not found')
+		if (!existingProfile) throw new NotFoundException('Profile not found')
 
-		const canManage = await this.canManageProfile(actorId, existingProfile.user.id)
-		if (!canManage) throw new ForbiddenException('You can edit only your own profile')
+		if (existingProfile.user) {
+			const canManage = await this.canManageProfile(actorId, existingProfile.user.id)
+			if (!canManage) throw new ForbiddenException('You can edit only your own profile')
+		} else {
+			const canManage = await this.canManageProfile(actorId, '')
+			if (!canManage) throw new ForbiddenException('Only admins can edit this profile')
+		}
 
 		if (!dto || Object.keys(dto).length === 0)
 			throw new BadRequestException('No data provided for update')

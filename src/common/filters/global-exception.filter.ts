@@ -56,9 +56,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 			return
 		}
 
-		response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-			statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-			message: 'Internal server error',
+		const isError = exception instanceof Error
+		const status = isError ? HttpStatus.BAD_REQUEST : HttpStatus.INTERNAL_SERVER_ERROR
+		const message = isError ? exception.message : 'Internal server error'
+
+		response.status(status).json({
+			statusCode: status,
+			message: message,
 			path: request.url,
 			timestamp: new Date().toISOString()
 		})
